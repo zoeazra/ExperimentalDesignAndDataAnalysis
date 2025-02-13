@@ -68,3 +68,49 @@ qqline(difference, col = "red")
 # If p > 0.05 --> fail to reject normality (data is normal)
 shapiro.test(difference)
 
+##################### QUESTION 1C ########################
+# calculating 97% CI for mu using t-score
+n = length(data$After8weeks)
+sample_mean = mean(data$After8weeks)
+sample_sd = sd(data$After8weeks)
+critical_value = qt(1-0.015, df=17)
+standard_error = sample_sd / sqrt(n)
+
+left_bound = sample_mean - critical_value * standard_error
+right_bound = sample_mean + critical_value * standard_error
+
+cat("97% Confidence Interval for mu: [", left_bound, ",", right_bound, "]\n")
+
+# calculating 97% CI for mu with bootstrapping
+bootstrap_ci = function(x, conf_level = 0.97, B = 10000) {
+  alpha = 1 - conf_level
+  Bstats = lapply(1:B, FUN = function(i) {
+    boot_sample = sample(x, size = length(x), replace = TRUE)
+    mean(boot_sample)
+  } )
+  Bstats = unlist(Bstats)
+  quantile(Bstats, prob = c(alpha/2, 1-alpha/2))
+}
+
+set.seed(42)
+bootstrap_ci(data$After8weeks)
+
+##################### QUESTION 1D ########################
+
+
+
+
+##################### QUESTION 1E ########################
+median(data$After8weeks)
+wilcox.test(data$After8weeks, mu = 6, alternative = "less")
+
+# Count how many values in After8weeks are less than 4.5
+count_below_4.5 = sum(data$After8weeks < 4.5)
+percentage_below_4.5 = (count_below_4.5 / length(data$After8weeks)) * 100
+cat("Percentage of cholesterol levels below 4.5:", percentage_below_4.5, "%\n")
+
+# H0: The fraction of cholesterol levels below 4.5 is at most 25%
+# H1: The fraction is greater than 25%
+# if the p-value is small (<0.05), we reject H0 and conclude that the fraction is significantly greater than 25%.
+binom.test(count_below_4.5, length(data$After8weeks), p = 0.25, alternative = "greater")
+
