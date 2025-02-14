@@ -68,6 +68,42 @@ qqline(difference, col = "red")
 # If p > 0.05 --> fail to reject normality (data is normal)
 shapiro.test(difference)
 
+# Doing permutation test:
+# H0: there is no difference between the Before and After8weeks groups
+diff = data$Before - data$After8weeks
+n_permutations = 1000
+observed_mean = mean(diff)
+
+permute_test = function(diff) {
+  permuted_diff <- diff * sample(c(-1, 1), length(diff), replace = TRUE)  # Randomly flip signs
+  return(mean(permuted_diff)) 
+}
+
+set.seed(42)
+permute_distr = replicate(n_permutations, permute_test(diff))
+
+# Histogram of the permutation distribution
+hist(permute_distr, probability = TRUE, col = "gray", 
+     main = "Permutation Test Distribution", xlab = "Mean Differences",
+     xlim = range(c(permute_distr, observed_mean)))  # Adjust x-axis limits
+
+# Add a red line at observed mean difference
+abline(v = observed_mean, col = "red", lwd = 2, lty = 2)
+
+# Print observed mean to check if it is within range
+cat("Observed mean difference:", observed_mean, "\n")
+
+# Compute p-value
+p_value = mean(abs(permute_distr) >= abs(observed_mean))
+cat("Permutation test p-value:", p_value, "\n")
+
+# Doing a Mann-Whitney U-test, as we are testing ordinal data
+# H0: There is no difference in mean cholesterol level in the Before and After groups
+wilcox.test(data$Before, data$After8weeks, paired = TRUE, alternative = "two.sided")
+# H1: cholesterol levels are lower after 8 weeks
+wilcox.test(data$Before, data$After8weeks, paired = TRUE, alternative = "greater")
+
+
 ##################### QUESTION 1C ########################
 # calculating 97% CI for mu using t-score
 n = length(data$After8weeks)

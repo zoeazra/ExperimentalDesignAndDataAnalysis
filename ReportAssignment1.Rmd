@@ -1,0 +1,59 @@
+---
+title: "Assignment 1 - Report"
+author: "Name, Name, Zoë Azra Blei, group 20"
+date: "23 February 2025"
+output: pdf_document
+fontsize: 11pt
+highlight: tango
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# Exercise 1
+
+### a) Make some relevant plots of this data set, comment on normality. Investigate whether the columns *Before* and *After8weeks* are correlated.
+
+```{r}
+# A scatter plot for correlation between Before and After8weeks
+plot(data$Before, data$After8weeks, 
+     main = 'Regression for Before and After 8 weeks of margarine', 
+     xlab='Before', 
+     ylab='After')
+abline(lm(After8weeks ~ Before, data = data), col = "red")
+
+# Some QQ-plots to try out
+#qplot(sample = Before, data = data, main = 'QQ-plot', xlab='theoretical', ylab = 'sample')
+#qplot(sample = After8weeks, data = data, main = 'QQ-plot', xlab='theoretical', ylab = 'sample')
+
+qqnorm(data$Before, main = "Q-Q Plot for Before")
+qqline(data$Before, col = "red")
+
+qqnorm(data$After8weeks, main = "Q-Q Plot for After 8 Weeks")
+qqline(data$After8weeks, col = "red")
+
+# Histograms to visualize distribution of Before and After8weeks
+hist(data$Before, probability = TRUE, 
+     main = 'Data distribution for Cholesterol level Before margarine',
+     xlab = 'Cholesterol level (mmol/L)',
+     ylab = 'Probability')
+lines(density(data$Before), col = "red", lwd = 2)
+
+hist(data$After8weeks, probability = TRUE, 
+     main = 'Data distribution for Cholesterol level After margarine',
+     xlab = 'Cholesterol level (mmol/L)',
+     ylab = 'Probability')
+lines(density(data$Before), col = "red", lwd = 2)
+```
+
+### b) Apply a couple of relevant tests (at least two tests, see Lectures 2–3) to verify whether the diet with low fat margarine has an eﬀect (argue whether the data are paired or not). Is a permutation test applicable? Is the Mann-Whitney test applicable?
+
+### c)
+
+### d)
+
+### e) Using an appropriate test, verify whether the median cholesterol level after 8 weeks of low fat diet is less than 6. Next, design and perform a test to check whether the fraction of the cholesterol levels after 8 weeks of low fat diet less than 4.5 is at most 25%.
+
+## Exercise 2
+
+## Exercise 3
