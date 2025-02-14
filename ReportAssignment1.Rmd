@@ -12,48 +12,213 @@ editor_options:
 
 # Exercise 1
 
-### a) Make some relevant plots of this data set, comment on normality. Investigate whether the columns *Before* and *After8weeks* are correlated.
+#### a) Make some relevant plots of this data set, comment on normality. Investigate whether the columns *Before* and *After8weeks* are correlated.
+
+In order to investigate the normality of the data set, Q-Q plots are
+created below for both the *Before* and *After8weeks* columns. As in
+both plots the data points closely follow the diagonal red line, the
+data is approximating a normal distribution. While some minor deviations
+may be present in the tails, the overall pattern suggests that the
+normality assumption is reasonable.
 
 ```{r}
-# A scatter plot for correlation between Before and After8weeks
-plot(data$Before, data$After8weeks, 
-     main = 'Regression for Before and After 8 weeks of margarine', 
-     xlab='Before', 
-     ylab='After')
-abline(lm(After8weeks ~ Before, data = data), col = "red")
-
-# Some QQ-plots to try out
-#qplot(sample = Before, data = data, main = 'QQ-plot', xlab='theoretical', ylab = 'sample')
-#qplot(sample = After8weeks, data = data, main = 'QQ-plot', xlab='theoretical', ylab = 'sample')
-
+par(mfrow = c(1,2)) 
 qqnorm(data$Before, main = "Q-Q Plot for Before")
 qqline(data$Before, col = "red")
-
 qqnorm(data$After8weeks, main = "Q-Q Plot for After 8 Weeks")
 qqline(data$After8weeks, col = "red")
 
-# Histograms to visualize distribution of Before and After8weeks
+```
+
+To further explore the normality assumption, histograms were plotted for
+both 'Before' and 'After8weeks'. The histograms appear to exhibit a
+roughly bell-shaped distribution, which supports the assumption of
+normality. However, more formally, a Shapiro-Wilk test is conducted
+below to test for normality in the data. Here,
+
+H0: The data is not normally distributed.
+
+```{r}
+shapiro.test(data$Before)
+shapiro.test(data$After8weeks)
+```
+
+```{r}
+par(mfrow = c(1,2))  
+
 hist(data$Before, probability = TRUE, 
-     main = 'Data distribution for Cholesterol level Before margarine',
+     main = 'Distribution for Cholesterol \n level Before margarine',
      xlab = 'Cholesterol level (mmol/L)',
      ylab = 'Probability')
 lines(density(data$Before), col = "red", lwd = 2)
 
 hist(data$After8weeks, probability = TRUE, 
-     main = 'Data distribution for Cholesterol level After margarine',
+     main = 'Distribution for Cholesterol \n level After margarine',
      xlab = 'Cholesterol level (mmol/L)',
      ylab = 'Probability')
-lines(density(data$Before), col = "red", lwd = 2)
+lines(density(data$After8weeks), col = "red", lwd = 2)
 ```
 
-### b) Apply a couple of relevant tests (at least two tests, see Lectures 2–3) to verify whether the diet with low fat margarine has an eﬀect (argue whether the data are paired or not). Is a permutation test applicable? Is the Mann-Whitney test applicable?
+In order to investigate the relationship between the columns of *Before*
+and *After8weeks* a scatter plot is created below. The scatter plot
+demonstrates a strong positive correlation between 'Before' and
+'After8weeks' cholesterol levels. The data points align closely with the
+red regression line, suggesting that individuals with higher cholesterol
+levels before the diet intervention also tend to have higher cholesterol
+levels after 8 weeks. This indicates that while cholesterol levels may
+have decreased, there remains a strong relationship between pre- and
+post-diet measurements.
 
-### c)
+To quantify this correlation, calculating Pearson’s correlation
+coefficient or Spearman’s rank correlation would be beneficial. A high
+Pearson correlation (close to 1) would confirm a strong linear
+relationship.
 
-### d)
+MAKE CODE FOR THIS AND ADD LATER
 
-### e) Using an appropriate test, verify whether the median cholesterol level after 8 weeks of low fat diet is less than 6. Next, design and perform a test to check whether the fraction of the cholesterol levels after 8 weeks of low fat diet less than 4.5 is at most 25%.
+```{r}
+plot(data$Before, data$After8weeks, 
+     main = 'Regression for Before and After8weeks', 
+     xlab='Before', 
+     ylab='After')
+abline(lm(After8weeks ~ Before, data = data), col = "red")
+```
 
-## Exercise 2
+#### b) Apply a couple of relevant tests (at least two tests, see Lectures 2–3) to verify whether the diet with low fat margarine has an eﬀect (argue whether the data are paired or not). Is a permutation test applicable? Is the Mann-Whitney test applicable?
 
-## Exercise 3
+```{r}
+# H0: The margarine diet has no effect, i.e. the mean cholesterol levels Before and After 8 weeks are the same
+# H1: The margarine diet reduces cholesterol levels --> mean_before > mean_after
+# Paired t-test
+# Assumption: the differences between Before and After should be normally distributed
+# Outcome: if p < 0.05, reject H0
+t.test(data$Before, data$After8weeks, paired = TRUE, alternative = "greater")
+
+# Visualizing distribution of the differences
+difference = data$Before - data$After8weeks
+
+hist(difference, probability = TRUE,
+     main = 'Data distribution of differences between Before and After8weeks',
+     col = 'lightblue',
+     xlab = 'Difference (Before - After8weeks)',
+     ylab = 'Proportion')
+lines(density(difference), col = 'red', lwd = 2)
+
+qqnorm(difference,
+       main = 'QQ-plot for differences',
+       xlab = 'Theoretical Quantiles',
+       ylab = 'Sample Quantiles')
+qqline(difference, col = "red")
+
+# Testing normality of the data
+# If p > 0.05 --> fail to reject normality (data is normal)
+shapiro.test(difference)
+
+# Doing permutation test:
+# H0: there is no difference between the Before and After8weeks groups
+diff = data$Before - data$After8weeks
+n_permutations = 1000
+observed_mean = mean(diff)
+
+permute_test = function(diff) {
+  permuted_diff <- diff * sample(c(-1, 1), length(diff), replace = TRUE)  # Randomly flip signs
+  return(mean(permuted_diff)) 
+}
+
+set.seed(42)
+permute_distr = replicate(n_permutations, permute_test(diff))
+
+# Histogram of the permutation distribution
+hist(permute_distr, probability = TRUE, col = "gray", 
+     main = "Permutation Test Distribution", xlab = "Mean Differences",
+     xlim = range(c(permute_distr, observed_mean)))  # Adjust x-axis limits
+
+# Add a red line at observed mean difference
+abline(v = observed_mean, col = "red", lwd = 2, lty = 2)
+
+# Print observed mean to check if it is within range
+cat("Observed mean difference:", observed_mean, "\n")
+
+# Compute p-value
+p_value = mean(abs(permute_distr) >= abs(observed_mean))
+cat("Permutation test p-value:", p_value, "\n")
+
+# Doing a Mann-Whitney U-test, as we are testing ordinal data
+# H0: There is no difference in mean cholesterol level in the Before and After groups
+wilcox.test(data$Before, data$After8weeks, paired = TRUE, alternative = "two.sided")
+# H1: cholesterol levels are lower after 8 weeks
+wilcox.test(data$Before, data$After8weeks, paired = TRUE, alternative = "greater")
+```
+
+#### c) Let *X1,...,X18* be the column *After8weeks*. Assume *X1,...,X18 \~ N(mu, sigma\^2) (*irrespective of your conclusion in a)) with unknown μ and σ^2. Construct a 97%-CI for μ based on normality. Next, construct a bootstrap 97%-CI for μ and compare it to the above CI.
+
+```{r}
+# calculating 97% CI for mu using t-score
+n = length(data$After8weeks)
+sample_mean = mean(data$After8weeks)
+sample_sd = sd(data$After8weeks)
+critical_value = qt(1-0.015, df=17)
+standard_error = sample_sd / sqrt(n)
+
+left_bound = sample_mean - critical_value * standard_error
+right_bound = sample_mean + critical_value * standard_error
+
+cat("97% Confidence Interval for mu: [", left_bound, ",", right_bound, "]\n")
+
+# calculating 97% CI for mu with bootstrapping
+bootstrap_ci = function(x, conf_level = 0.97, B = 10000) {
+  alpha = 1 - conf_level
+  Bstats = lapply(1:B, FUN = function(i) {
+    boot_sample = sample(x, size = length(x), replace = TRUE)
+    mean(boot_sample)
+  } )
+  Bstats = unlist(Bstats)
+  quantile(Bstats, prob = c(alpha/2, 1-alpha/2))
+}
+
+set.seed(42)
+bootstrap_ci(data$After8weeks)
+```
+
+#### d) Using a bootstrap test with test statistic T=max(X1,…,X18), determine those θ∈[3,12] (if there are any) for which  H0:X1,…,X18∼Unif[3,θ] is not rejected. Can the Kolmogorov-Smirnov test be also applied for this question? If yes, apply it; if not, explain why not.
+
+#### e) Using an appropriate test, verify whether the median cholesterol level after 8 weeks of low fat diet is less than 6. Next, design and perform a test to check whether the fraction of the cholesterol levels after 8 weeks of low fat diet less than 4.5 is at most 25%.
+
+```{r}
+median(data$After8weeks)
+wilcox.test(data$After8weeks, mu = 6, alternative = "less")
+
+# Count how many values in After8weeks are less than 4.5
+count_below_4.5 = sum(data$After8weeks < 4.5)
+percentage_below_4.5 = (count_below_4.5 / length(data$After8weeks)) * 100
+cat("Percentage of cholesterol levels below 4.5:", percentage_below_4.5, "%\n")
+
+# H0: The fraction of cholesterol levels below 4.5 is at most 25%
+# H1: The fraction is greater than 25%
+# if the p-value is small (<0.05), we reject H0 and conclude that the fraction is significantly greater than 25%.
+binom.test(count_below_4.5, length(data$After8weeks), p = 0.25, alternative = "greater")
+```
+
+# Exercise 2
+
+#### a) Investigate whether two factors *County* and *Related* (and possibly their interaction) influence the crops by performing relevant ANOVA model(s), without taking *Size* into account. Using a chosen model, estimate the crops for a typical farm in County 3 for which landlord and tenant are not related. Comment on your findings.
+
+#### b) Now include also *Size* as explanatory variable into the analysis (think of ANCOVA). Investigate whether the influence of *Size* on *Crops* is similar for all three counties and whether the influence of *Size* depends on the relation of landlord and tenant of the farm. (Consider at most one (relevant) pairwise interaction per model.) Choose the most appropriate model.
+
+#### c) For the resulting model from b), investigate how *County*, *Related* and *Size* influence *Crops*.
+
+#### d) Using the resulting model from b), predict the crops for a farm from County 2 of size 165, with related landlord and tenant. Estimate also the error variance.
+
+# Exercise 3
+
+#### a) Present an R-code for the randomization process to distribute soil additives over plots in such a way that each soil additive is received exactly by two plots within each block.
+
+#### b) Make a plot to show the average yield per block for the soil treated with nitrogen and for the soil that did not receive nitrogen, and comment.
+
+#### c) Conduct a full two-way ANOVA with the response variable *yield* and the two factors *block* and *N*. Was it sensible to include factor *block* into this model? Can we also apply the Friedman test for this situation?
+
+#### d) Investigate other possible models with all the factors combined, restricting to only one (pair-wise) interaction term of factors *N*, *P* and *K* with block in one model (no need to check the model assumptions for all the models). Test for the presence of main eﬀects of *N*, *P* and *K*, possibly taking into account factor *block*. Give your favorite model and motivate your choice.
+
+#### e) For the resulting model from d), investigate how the involved factors influence *yield*. Which combination of the levels of the factors in the model leads to the largest yield?
+
+#### f) Recall the main question of interest. In this light, for the resulting model from d) perform a mixed eﬀects analysis, modeling the block variable as a random eﬀect by using the function *lmer*. Compare your results to the results found by using the fixed eﬀects model. (You will need to install the R-package *lme4*, which is not included in the standard distribution of R.)
