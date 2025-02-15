@@ -13,6 +13,9 @@ possible_plots <- expand.grid(N = c(0, 1), P = c(0, 1), K = c(0, 1))
 # Randomly assign combinations
 random_additives <- list()
 
+# Randomly dsitribute over blocka
+random_distributed <- list()
+
 for (block in n_blocks) {
   random_additives[[block]] <- sample(1:nrow(possible_plots), n_plots, replace = TRUE)
 }
@@ -33,7 +36,12 @@ for (block in n_blocks) {
     # Insert 1 into df for selected rows
     blocks[row, additive] <- 1
   }
+  
+  # Save block data seperatly and assign data 
+  blocks$Block <- block
+  random_distributed[[block]] <- blocks
+  
 }
 
 blocks
-
+random_distributed
