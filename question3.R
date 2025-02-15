@@ -6,15 +6,14 @@ n_blocks <- 1:6
 n_plots <- 4
 additives <- c("N", "P", "K")
 
+# .
+# Not used at this moment, assigns randomly (save for later)
+
 # Create all possible combinations
 possible_plots <- expand.grid(N = c(0, 1), P = c(0, 1), K = c(0, 1))
-#possible_plots
 
 # Randomly assign combinations
 random_additives <- list()
-
-# Randomly dsitribute over blocka
-random_distributed <- list()
 
 for (block in n_blocks) {
   random_additives[[block]] <- sample(1:nrow(possible_plots), n_plots, replace = TRUE)
@@ -22,9 +21,13 @@ for (block in n_blocks) {
 
 random_additives
 
+# . 
 # Less computational way to assign randomly but adhere to max 2
 
-# Create empty 4x3 grid
+# Randomly distribute over blocks
+random_distributed <- list()
+
+# Create empty 4x3 grid as df
 for (block in n_blocks) {
   blocks <- data.frame(matrix(0, nrow = n_plots, ncol = length(additives)))
   colnames(blocks) <- additives
@@ -37,11 +40,10 @@ for (block in n_blocks) {
     blocks[row, additive] <- 1
   }
   
-  # Save block data seperatly and assign data 
+  # Save and assign block data
   blocks$Block <- block
   random_distributed[[block]] <- blocks
   
 }
 
-blocks
 random_distributed
