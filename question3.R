@@ -30,9 +30,10 @@ for (block in n_blocks) {
   for (additive in additives) {
     # Choose a random row
     row <- sample(1:n_plots, 2, replace = FALSE)
+    # Insert 1 into df for selected rows
+    blocks[row, additive] <- 1
   }
 }
 
 blocks
-row
 
