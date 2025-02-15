@@ -13,7 +13,8 @@ possible_plots <- expand.grid(N = c(0, 1), P = c(0, 1), K = c(0, 1))
 random_additives <- list()
 
 for (block in blocks) {
-  random_additives[block] <- sample(1:nrow(possible_plots), replace = TRUE)
+  random_additives[[block]] <- sample(1:nrow(possible_plots), plots, replace = TRUE)
 }
 
 random_additives
+
