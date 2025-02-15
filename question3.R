@@ -25,7 +25,14 @@ random_additives
 for (block in n_blocks) {
   blocks <- data.frame(matrix(0, nrow = n_plots, ncol = length(additives)))
   colnames(blocks) <- additives
+  
+  # Assign 2x in each additive randomly
+  for (additive in additives) {
+    # Choose a random row
+    row <- sample(1:n_plots, 2, replace = FALSE)
+  }
 }
 
 blocks
+row
 
