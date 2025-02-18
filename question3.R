@@ -47,7 +47,6 @@ random_distributed
 #Q: Make a plot to show the average yield per block for the soil treated with 
 # nitrogen and for the soil that did not receive nitrogen, and comment.
 
-#Pseudo 1: group together the correct blocks (with and without N)
 #Pseudo 2: calc average for each
 # Pseudo 3: create bar plot for each block with and without next to each other
 # Yield on y, block on x
@@ -55,5 +54,8 @@ random_distributed
 # Group npk data by block and N
 grouped_data <- group_by(npk, block, N)
 
-grouped_data
+# Calculate the average yield for each group
+average_yield_block = summarise(grouped_data, Average_Yield = mean(yield))
+
+average_yield_block
 
