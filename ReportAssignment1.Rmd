@@ -273,13 +273,28 @@ Finally, we have to check the model assumptions
 ```{r, echo=FALSE }
 par(mfrow=c(1,2))
 qqnorm(residuals(model_a))
+qqline(residuals(model_a), col = "red", lwd = 2)  
+
 plot(fitted(model_a), residuals(model_a))
 
 ```
 
 ```{r, echo=FALSE }
-hist(residuals(model_a), main = "Histogram of Residuals", xlab = "Residuals", col = "lightblue", border = "black")
+hist_data <- hist(residuals(model_a), 
+                  main = "Histogram of Residuals", 
+                  xlab = "Residuals", 
+                  col = "lightblue", 
+                  border = "black", 
+                  freq = FALSE)  # Use density instead of counts
 
+# Compute normal distribution curve
+residual_mean <- mean(residuals(model_a))
+residual_sd <- sd(residuals(model_a))
+x_vals <- seq(min(residuals(model_a)), max(residuals(model_a)), length = 100)
+y_vals <- dnorm(x_vals, mean = residual_mean, sd = residual_sd)
+
+# Add the normal curve
+lines(x_vals, y_vals, col = "red", lwd = 2)
 ```
 
 
