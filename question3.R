@@ -63,6 +63,10 @@ absent_nitrogen <- filter(average_yield_block, N==0)
 present_nitrogen <- filter(average_yield_block, N==1)
 
 # Plot the average yield
-avg_yield_plot <- ggplot(average_yield_block, aes(x = factor(block), y = Average_Yield, fill = factor(N)))
+avg_yield_plot <- ggplot(average_yield_block, aes(x = block, y = Average_Yield, fill = N)) + 
+  geom_bar(stat = "identity", position = "dodge")
+
+
+
 avg_yield_plot
 
