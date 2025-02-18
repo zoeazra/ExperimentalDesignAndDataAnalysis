@@ -115,3 +115,18 @@ shapiro.test(residuals(two_way_anova))
 
 # Tests are met therefore friedman not neccesary
 # Fairly normally distributed, passess p-values, all Hypotheses are accepted
+
+
+# START OF 3.d
+
+#Only main effects, without interaction terms
+# assumes no interaction between components 
+# Effect of each on yield
+model_1 <- aov(yield ~ N + P + K + block, data = npk)
+summary(model_1)
+
+model_2 <- aov(yield ~ P * K + K * block, data = npk)
+summary(model_2)
+
+# Seems only N really has a significatnt effect, combining models to showcase 
+# that is prefered?
