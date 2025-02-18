@@ -1,5 +1,16 @@
 # To access the correct file, import MASS
 # install.packages('MASS')
+# install.packages('ggplot2')
+# install.packages ('dplyr')
+
+# Load the packages and dataset
+library(MASS)
+library(dplyr)
+library(ggplot2)
+
+data(npk)
+
+# START OF 3.a
 
 # Set block and plot dimensions
 n_blocks <- 1:6
@@ -9,7 +20,7 @@ additives <- c("N", "P", "K")
 # Create a list to randomly distribute over blocks
 random_distributed <- list()
 
-# Create empty 4x3 grid as df
+# Create empty 4x3 (plots x additives) grid as data frame
 for (block in n_blocks) {
   blocks <- data.frame(matrix(0, nrow = n_plots, ncol = length(additives)))
   colnames(blocks) <- additives
@@ -29,3 +40,20 @@ for (block in n_blocks) {
 }
 
 random_distributed
+
+
+# START OF 3.b
+
+#Q: Make a plot to show the average yield per block for the soil treated with 
+# nitrogen and for the soil that did not receive nitrogen, and comment.
+
+#Pseudo 1: group together the correct blocks (with and without N)
+#Pseudo 2: calc average for each
+# Pseudo 3: create bar plot for each block with and without next to each other
+# Yield on y, block on x
+
+# Group npk data by block and N
+grouped_data <- group_by(npk, block, N)
+
+grouped_data
+
