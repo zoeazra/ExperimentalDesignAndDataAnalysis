@@ -57,6 +57,12 @@ grouped_data <- group_by(npk, block, N)
 # Calculate the average yield for each group
 average_yield_block = summarise(grouped_data, Average_Yield = mean(yield))
 # average_yield_block
-# Obtain data for each block where N=0
-no_nitrogen_test <- filter(average_yield_block, N==0)
-no_nitrogen_test
+
+# Obtain data for each block where N=0 and N=1
+absent_nitrogen <- filter(average_yield_block, N==0)
+present_nitrogen <- filter(average_yield_block, N==1)
+
+# Plot the average yield
+avg_yield_plot <- ggplot(average_yield_block, aes(x = factor(block), y = Average_Yield, fill = factor(N)))
+avg_yield_plot
+
