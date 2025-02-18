@@ -10,6 +10,7 @@ editor_options:
     wrap: 72
 ---
 
+::: {style="text-align: justify;"}
 # Exercise 1
 
 First we load and read the necessary data set
@@ -245,16 +246,6 @@ cat("Percentage of cholesterol levels below 4.5:", percentage_below_4.5, "%\n")
 binom.test(count_below_4.5, length(data$After8weeks), p = 0.25, alternative = "greater")
 ```
 
-# Exercise 2
-
----
-title: "Assignment 1"
-author: "Zoë Azra Blei, Frederieke Loth, Eleni Liarou, group 20"
-date: "`r Sys.Date()`"
-output: pdf_document
-highlight: tango
----
-
 ## Exercise 2: Crops
 
 First we load the necessary data
@@ -339,13 +330,19 @@ Finally, we have to check the model assumptions
 ```{r, echo=FALSE }
 par(mfrow=c(1,2))
 qqnorm(residuals(model_a))
+qqline(residuals(model_a), col = "red", lwd = 2) 
 plot(fitted(model_a), residuals(model_a))
+
 
 ```
 
 ```{r, echo=FALSE }
-hist(residuals(model_a), main = "Histogram of Residuals", xlab = "Residuals", col = "lightblue", border = "black")
+hist(residuals(model_a), col = "lightblue", border = "black", 
+     main = "Histogram of Residuals", xlab = "Residuals", freq = FALSE)
 
+# Add normal distribution curve
+curve(dnorm(x, mean = mean(residuals(model_a)), sd = sd(residuals(model_a))), 
+      col = "red", lwd = 2, add = TRUE)
 ```
 
 ```{r}
@@ -550,3 +547,4 @@ rather than parameter estimation.
 #### e) For the resulting model from d), investigate how the involved factors influence *yield*. Which combination of the levels of the factors in the model leads to the largest yield?
 
 #### f) Recall the main question of interest. In this light, for the resulting model from d) perform a mixed eﬀects analysis, modeling the block variable as a random eﬀect by using the function *lmer*. Compare your results to the results found by using the fixed eﬀects model. (You will need to install the R-package *lme4*, which is not included in the standard distribution of R.)
+:::
