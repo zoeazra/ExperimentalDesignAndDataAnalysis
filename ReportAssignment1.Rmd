@@ -12,6 +12,12 @@ editor_options:
 
 # Exercise 1
 
+First we load and read the necessary data set
+
+```{r}
+data = read.delim("cholesterol.txt", sep=' ')
+```
+
 #### a) Make some relevant plots of this data set, comment on normality. Investigate whether the columns *Before* and *After8weeks* are correlated.
 
 In order to investigate the normality of the data set, Q-Q plots are
@@ -21,7 +27,7 @@ data is approximating a normal distribution. While some minor deviations
 may be present in the tails, the overall pattern suggests that the
 normality assumption is reasonable.
 
-```{r}
+```{r, echo=FALSE}
 par(mfrow = c(1,2)) 
 
 qqnorm(data$Before, main = "Q-Q Plot for Before")
@@ -37,7 +43,7 @@ plotted for both 'Before' and 'After8weeks'. The histograms exhibit a
 roughly bell-shaped distribution, which supports the assumption of
 normality.
 
-```{r}
+```{r, echo=FALSE}
 par(mfrow = c(1,2))  
 
 hist(data$Before, probability = TRUE, 
@@ -54,19 +60,18 @@ lines(density(data$After8weeks), col = "red", lwd = 2)
 ```
 
 However, to address normality more formally, a Shapiro-Wilk test is
-conducted. Since we are considering a small data set, the Shaprio-Wilk
-test is fit to assess whether the data set follows a normal
-distribution. For the test the null hypothesis is as follows:
+conducted, as this test is suitable to test on normallity for small data
+sets. For the test the null hypothesis is as follows:
 
 H0: The data is normally distributed.
 
-The W-value compares how closely the data follows a normal distribution.
-The statistic ranges from 0 to 1, where a value close to 1 indicates
-that the data is likely normal. Considering the results for *Before* and
-*After8weeks*, both W-values are close to 1. Additionally, assuming a
-95% standard error, both p-values exhibit values higher than 0.05. These
-two results give significant evidence that suggests the data of both
-columns is normally distributed.
+The W-statistic measures how closely the data aligns with a normal
+distribution, ranging from 0 to 1, where values closer to 1 indicate a
+stronger likelihood of normality. Considering the results for *Before*
+and *After8weeks*, both W-values are close to 1. Additionally, with a
+95% confidence level, both p-values exceed 0.05, meaning that we fail to
+reject H0. These findings provide strong evidence that the data in both
+columns can be considered to be normally distributed.
 
 ```{r}
 shapiro.test(data$Before)
@@ -83,14 +88,7 @@ levels after 8 weeks. This indicates that while cholesterol levels may
 have decreased, there remains a strong relationship between pre- and
 post-diet measurements.
 
-To quantify this correlation, calculating Pearson’s correlation
-coefficient or Spearman’s rank correlation would be beneficial. A high
-Pearson correlation (close to 1) would confirm a strong linear
-relationship.
-
-MAKE CODE FOR THIS AND ADD LATER
-
-```{r}
+```{r, echo=FALSE}
 plot(data$Before, data$After8weeks, 
      main = 'Regression for Before and After8weeks', 
      xlab='Before', 
@@ -98,7 +96,39 @@ plot(data$Before, data$After8weeks,
 abline(lm(After8weeks ~ Before, data = data), col = "red")
 ```
 
+To quantify this correlation, the Pearson’s correlation coefficient is
+calculated below. A high Pearson correlation (close to 1) indicates a
+strong positive relationship between the two columns. The correlation
+coefficient exhibits a value of approximately 0.99, confirming the
+strong positive relationship. Additionally, the p-value is smaller than
+0.05, indicating that the correlation is statistically significant.
+
+```{r}
+cor.test(data$Before, data$After8weeks, method = "pearson")
+```
+
 #### b) Apply a couple of relevant tests (at least two tests, see Lectures 2–3) to verify whether the diet with low fat margarine has an eﬀect (argue whether the data are paired or not). Is a permutation test applicable? Is the Mann-Whitney test applicable?
+
+As the cholesterol data was measured on the same population at different
+times, we consider the data to be paired. In this case it is possible to
+conduct a T-test for paired samples. However, in order to This test
+assumes that the mean difference of the two populations is normally
+distributed, thus, a Shapiro-Wilk test is conducted first to investigate
+the distribution.
+
+```{r}
+difference = data$Before - data$After8weeks
+shapiro.test(difference)
+```
+
+Explain that the data is paired:
+
+We are doing a T-test
+
+The null hypothesis is as follows:
+
+H0: The margarine diet has no effect, i.e. the mean cholesterol levels
+*Before* and *After8weeks* are the same.
 
 ```{r}
 # H0: The margarine diet has no effect, i.e. the mean cholesterol levels Before and After 8 weeks are the same
@@ -110,6 +140,8 @@ t.test(data$Before, data$After8weeks, paired = TRUE, alternative = "greater")
 
 # Visualizing distribution of the differences
 difference = data$Before - data$After8weeks
+
+shapiro.test(difference)
 
 hist(difference, probability = TRUE,
      main = 'Data distribution of differences between Before and After8weeks',
@@ -123,10 +155,10 @@ qqnorm(difference,
        xlab = 'Theoretical Quantiles',
        ylab = 'Sample Quantiles')
 qqline(difference, col = "red")
+```
 
-# Testing normality of the data
-# If p > 0.05 --> fail to reject normality (data is normal)
-shapiro.test(difference)
+```{r}
+
 
 # Doing permutation test:
 # H0: there is no difference between the Before and After8weeks groups
@@ -307,28 +339,13 @@ Finally, we have to check the model assumptions
 ```{r, echo=FALSE }
 par(mfrow=c(1,2))
 qqnorm(residuals(model_a))
-qqline(residuals(model_a), col = "red", lwd = 2)  
-
 plot(fitted(model_a), residuals(model_a))
 
 ```
 
 ```{r, echo=FALSE }
-hist_data <- hist(residuals(model_a), 
-                  main = "Histogram of Residuals", 
-                  xlab = "Residuals", 
-                  col = "lightblue", 
-                  border = "black", 
-                  freq = FALSE)  # Use density instead of counts
+hist(residuals(model_a), main = "Histogram of Residuals", xlab = "Residuals", col = "lightblue", border = "black")
 
-# Compute normal distribution curve
-residual_mean <- mean(residuals(model_a))
-residual_sd <- sd(residuals(model_a))
-x_vals <- seq(min(residuals(model_a)), max(residuals(model_a)), length = 100)
-y_vals <- dnorm(x_vals, mean = residual_mean, sd = residual_sd)
-
-# Add the normal curve
-lines(x_vals, y_vals, col = "red", lwd = 2)
 ```
 
 ```{r}
