@@ -6,25 +6,7 @@ n_blocks <- 1:6
 n_plots <- 4
 additives <- c("N", "P", "K")
 
-# .
-# Not used at this moment, assigns randomly (save for later)
-
-# Create all possible combinations
-possible_plots <- expand.grid(N = c(0, 1), P = c(0, 1), K = c(0, 1))
-
-# Randomly assign combinations
-random_additives <- list()
-
-for (block in n_blocks) {
-  random_additives[[block]] <- sample(1:nrow(possible_plots), n_plots, replace = TRUE)
-}
-
-random_additives
-
-# . 
-# Less computational way to assign randomly but adhere to max 2
-
-# Randomly distribute over blocks
+# Create a list to randomly distribute over blocks
 random_distributed <- list()
 
 # Create empty 4x3 grid as df
@@ -32,11 +14,11 @@ for (block in n_blocks) {
   blocks <- data.frame(matrix(0, nrow = n_plots, ncol = length(additives)))
   colnames(blocks) <- additives
   
-  # Assign 2x in each additive randomly
+  # Assign 2x 1 in each additive randomly
   for (additive in additives) {
     # Choose a random row
     row <- sample(1:n_plots, 2, replace = FALSE)
-    # Insert 1 into df for selected rows
+    # Insert 1 to signify presence of additive for selected rows
     blocks[row, additive] <- 1
   }
   
