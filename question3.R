@@ -94,5 +94,24 @@ avg_yield_plot
 two_way_anova <- aov(yield ~ block + N, data = npk)
 summary(two_way_anova)
 
+# Friedman is useful when the hypothesis/assumptions of normality and homogeneity 
+# are not met, double check
 
+# Extra, not neccesary?
+# analysis of residuals (normality test)
+qqnorm((residuals)(two_way_anova))
+qqline(residuals(two_way_anova), col = 'red')
 
+# points deviate slightly but more towards the tail
+
+#distribution in histogram (since slight deviation at tail)
+hist(residuals(two_way_anova), main = "Histogram of Residuals", xlab = "Residuals", breaks = 10)
+
+# Shapiro Wilk test (since slight deviation at tail)
+shapiro.test(residuals(two_way_anova))
+
+# p-value 0.6514 ( greater than 0.05) so does not significantly deviate from normality
+# Likely normally distributed
+
+# Tests are met therefore friedman not neccesary
+# Fairly normally distributed, passess p-values, all Hypotheses are accepted
