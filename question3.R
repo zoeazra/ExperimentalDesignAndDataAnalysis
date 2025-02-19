@@ -158,12 +158,22 @@ summary(model_3)
 #assess data by combinations, group?
 # calc mean yield
 
-npk$N <- factor(npk$N)
-npk$K <- factor(npk$K)
-npk$block <- factor(npk$block)
+#npk$N <- factor(npk$N)
+#npk$K <- factor(npk$K)
+#npk$block <- factor(npk$block)
 
 seperated_groups <- split(npk$yield, list(npk$N, npk$K, npk$block))
 mean_yield <- sapply(seperated_groups, mean)
-yield_summary <- data.frame(combination = names(mean_yield), mean_yield = mean_yield)
-yield_summary <- yield_summary[order(-yield_summary$mean_yield), ]
+combination <- paste(npk$N, npk$K, npk$block)
+
+yield_summary <- aggregate(yield ~ combination, data = npk, FUN = mean)
+yield_summary <- yield_summary[order(-yield_summary$yield), ]
 yield_summary
+
+tukey_results <- TukeyHSD(model_3)
+tukey_results
+summary(tukey_results)
+
+# From the TukeyHSD results we see that K has a significant negative impact on yield.
+# Therefore the best combination for model 3 (where we do not consider P) is N = 1 and K = 0
+# Block factor introduces variability with block 3 having the overall biggest positive impact and block 1 a relatively lower yield
