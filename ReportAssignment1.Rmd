@@ -112,55 +112,90 @@ cor.test(data$Before, data$After8weeks, method = "pearson")
 
 As the cholesterol data was measured on the same population at different
 times, we consider the data to be paired. In this case it is possible to
-conduct a T-test for paired samples. However, in order to This test
-assumes that the mean difference of the two populations is normally
-distributed, thus, a Shapiro-Wilk test is conducted first to investigate
-the distribution.
+conduct a T-test for paired samples. However, the T-test assumes that
+the mean difference of the two populations is normally distributed.
+Below, a histogram and Q-Q plot are created to visualize the
+distribution of the mean difference.
+
+The histogram shows a distribution that approximates the bell-shaped
+curve of a normal distribution. The density curve (red line) closely
+follows the bars, further supporting this observation. The histrogram is
+centered around 0.6-0.7, suggesting that cholesterol levels decreased
+after 8 weeks, on average. The data in the Q-Q plot align well with the
+diagonal red line, suggesting that the differences are approximating a
+normal distribution. There are a few points in the lower left tail that
+deviate slightly from the red line, which could indicate a mild
+skewness. However, the deviations are not extreme, and since we are
+working with a small sample size (n = 18), some variability in the Q-Q
+plot is expected. With small datasets, normality tests and visual
+assessments can be more sensitive to minor deviations, which may not
+necessarily indicate a significant departure from normality. Therefore,
+while the slight skewness should be noted, the overall trend in the Q-Q
+plot supports the assumption of approximate normality, making it
+reasonable to proceed with parametric tests such as the paired T-test.
 
 ```{r}
-difference = data$Before - data$After8weeks
-shapiro.test(difference)
-```
-
-Explain that the data is paired:
-
-We are doing a T-test
-
-The null hypothesis is as follows:
-
-H0: The margarine diet has no effect, i.e. the mean cholesterol levels
-*Before* and *After8weeks* are the same.
-
-```{r}
-# H0: The margarine diet has no effect, i.e. the mean cholesterol levels Before and After 8 weeks are the same
-# H1: The margarine diet reduces cholesterol levels --> mean_before > mean_after
-# Paired t-test
-# Assumption: the differences between Before and After should be normally distributed
-# Outcome: if p < 0.05, reject H0
-t.test(data$Before, data$After8weeks, paired = TRUE, alternative = "greater")
-
-# Visualizing distribution of the differences
-difference = data$Before - data$After8weeks
-
-shapiro.test(difference)
-
-hist(difference, probability = TRUE,
-     main = 'Data distribution of differences between Before and After8weeks',
+par(mfrow = c(1,2))
+hist(difference, freq = TRUE,
+     main = 'Data distribution of the \n mean difference',
      col = 'lightblue',
      xlab = 'Difference (Before - After8weeks)',
-     ylab = 'Proportion')
+     ylab = 'Frequency')
 lines(density(difference), col = 'red', lwd = 2)
 
 qqnorm(difference,
-       main = 'QQ-plot for differences',
+       main = 'QQ-plot for mean difference',
        xlab = 'Theoretical Quantiles',
        ylab = 'Sample Quantiles')
 qqline(difference, col = "red")
 ```
 
+To gather more siginifcant evidence for the assumption that the mean
+difference is normally distributed, such that we can conduct the T-test,
+a Shapiro-Wilk test is conducted. We consider the following null
+hypothesis:
+
+H0: The data is normally distributed.
+
+The W-statistic exhibits a high value close to 1 of approximately 0.98,
+additionally, the p-value exceeds 0.05. These results indicate that we
+fail to reject H0, which means we have strong evidence to assume the
+distribution of the mean difference is normal.
+
 ```{r}
+difference = data$Before - data$After8weeks
+shapiro.test(difference)
+```
 
+Since we have strong evidence to assume that the data is normally
+distributed, we can proceed to conduct the T-test. For this, we consider
+the following null hypothesis:
 
+H0: The margarine diet has no effect, i.e. the mean cholesterol levels
+*Before* and *After8weeks* are the same.
+
+Looking at the results from the test, we observe that the t-statistic is
+14.946 with 17 degrees of freedom (df = 17). The p-value is extremely
+small (p = 1.639e-11), providing strong evidence to reject the null
+hypothesis and support the assumption of the alternative hypothesis
+which states that the true mean difference is greater than 0. This
+indicates that the cholesterol levels before the diet were significantly
+higher than after 8 weeks, supporting the claim that the margarine diet
+has a significant effect. The mean difference of 0.629 further supports
+this, indicating an average reduction is cholesterol levels. Lastly, the
+95% confidence interval for the mean difference is [0.556, ∞], meaning
+that we are 95% confident that the true mean reduction in cholesterol is
+at least 0.556 mmol/L. The ∞ as upper-bound is due to the one-sided
+T-test.
+
+```{r}
+# Outcome: if p < 0.05, reject H0
+t.test(data$Before, data$After8weeks, paired = TRUE, alternative = "greater")
+```
+
+Doing a permutation test
+
+```{r}
 # Doing permutation test:
 # H0: there is no difference between the Before and After8weeks groups
 diff = data$Before - data$After8weeks
@@ -175,6 +210,15 @@ permute_test = function(diff) {
 set.seed(42)
 permute_distr = replicate(n_permutations, permute_test(diff))
 
+# Print observed mean to check if it is within range
+cat("Observed mean difference:", observed_mean, "\n")
+
+# Compute p-value
+p_value = mean(abs(permute_distr) >= abs(observed_mean))
+cat("Permutation test p-value:", p_value, "\n")
+```
+
+```{r}
 # Histogram of the permutation distribution
 hist(permute_distr, probability = TRUE, col = "gray", 
      main = "Permutation Test Distribution", xlab = "Mean Differences",
@@ -182,14 +226,9 @@ hist(permute_distr, probability = TRUE, col = "gray",
 
 # Add a red line at observed mean difference
 abline(v = observed_mean, col = "red", lwd = 2, lty = 2)
+```
 
-# Print observed mean to check if it is within range
-cat("Observed mean difference:", observed_mean, "\n")
-
-# Compute p-value
-p_value = mean(abs(permute_distr) >= abs(observed_mean))
-cat("Permutation test p-value:", p_value, "\n")
-
+```{r}
 # Doing a Mann-Whitney U-test, as we are testing ordinal data
 # H0: There is no difference in mean cholesterol level in the Before and After groups
 wilcox.test(data$Before, data$After8weeks, paired = TRUE, alternative = "two.sided")
@@ -198,6 +237,42 @@ wilcox.test(data$Before, data$After8weeks, paired = TRUE, alternative = "greater
 ```
 
 #### c) Let *X1,...,X18* be the column *After8weeks*. Assume *X1,...,X18 \~ N(mu, sigma\^2) (*irrespective of your conclusion in a)) with unknown μ and σ\^2. Construct a 97%-CI for μ based on normality. Next, construct a bootstrap 97%-CI for μ and compare it to the above CI.
+
+In order to construct a 97% confidence interval for the mean of
+*After8weeks*, we need to calculate the sample mean and sample standard
+deviation first, since the population mean and population standard
+deviation are unknown. Calculating these values results in a sample mean
+of approximately 5.77 and sample standard deviation of 1.11. After
+computing the critical value from the T-disitribution with 17 degrees of
+freedom using the *qt* function in R, we can compute the 97% confidence
+interval for mu. Using the standard equation for calculating the
+confidence interval, we get [5.164, 6.394].
+
+Bootstrapping does not take into account a normality assumption of the
+data. Even though we performed several tests that support a normal
+distribution in the data in the previous exercises, it is still possible
+that the assumption does not hold. To construct the bootstrap confidence
+interval we re-sample the *After8weeks* data with replacement (for
+10,000 iterations). After this, the mean for each re-sample is computed.
+Then we take the 2nd percentile and 98th percentile of the re-sampled
+means to form the 97% bootstrap confidence interval. The results
+indicate that the 97% bootstrap confidence interval for the mean
+cholesterol level after 8 weeks is [5.230, 6.320]. This suggests that,
+even without assuming normality, the true mean cholesterol level after
+the diet likely falls within this range. Since the interval does not
+extend to extremely low values, it confirms that cholesterol levels
+remain in a moderate range after the intervention.
+
+The 97% confidence intervals from both the parametric t-test and
+bootstrapping provide similar estimates for the true mean cholesterol
+level after 8 weeks. The t-test CI is [5.164, 6.394], while the
+bootstrap CI is [5.230, 6.320], showing substantial overlap. The slight
+differences arise because the t-test assumes normality and uses the
+sample standard deviation, whereas bootstrapping does not rely on this
+assumption and estimates the interval purely from resampling. Since both
+methods yield consistent results, this reinforces confidence that the
+mean cholesterol level is reliably estimated, regardless of normality
+assumptions.
 
 ```{r}
 # calculating 97% CI for mu using t-score
@@ -210,7 +285,11 @@ standard_error = sample_sd / sqrt(n)
 left_bound = sample_mean - critical_value * standard_error
 right_bound = sample_mean + critical_value * standard_error
 
+cat("The sample mean is:", sample_mean, "\n")
+cat("The sample standard deviation is:", sample_sd, "\n")
+cat("The critical value is:", critical_value, "\n")
 cat("97% Confidence Interval for mu: [", left_bound, ",", right_bound, "]\n")
+cat("\n")
 
 # calculating 97% CI for mu with bootstrapping
 bootstrap_ci = function(x, conf_level = 0.97, B = 10000) {
@@ -220,20 +299,135 @@ bootstrap_ci = function(x, conf_level = 0.97, B = 10000) {
     mean(boot_sample)
   } )
   Bstats = unlist(Bstats)
-  quantile(Bstats, prob = c(alpha/2, 1-alpha/2))
+  ci = quantile(Bstats, prob = c(alpha/2, 1-alpha/2))
+  cat("Bootstrap test with", conf_level * 100, "% Confidence Interval:\n")
+  return (ci)
 }
 
 set.seed(42)
 bootstrap_ci(data$After8weeks)
 ```
 
-#### d) Using a bootstrap test with test statistic T=max(X1,…,X18), determine those θ∈[3,12] (if there are any) for which  H0:X1,…,X18∼Unif[3,θ] is not rejected. Can the Kolmogorov-Smirnov test be also applied for this question? If yes, apply it; if not, explain why not.
+#### d) Using a bootstrap test with test statistic T=max(X1,…,X18), determine those θ∈[3,12] (if there are any) for which H0:X1,…,X18*\~* Unif[3,θ] is not rejected. Can the Kolmogorov-Smirnov test be also applied for this question? If yes, apply it; if not, explain why not.
+
+For the following bootstrap test, we consider the following null
+hypothesis:
+
+H0: The data follows a uniform distribution with a minimum of 3 and an
+unknown maximum θ.
+
+In order to generate the bootstrap samples from a Uniform distribution
+between 3 and θ, we create a sequence of θ values between 3 and 12 with
+a step size of 0.1 that will be tested. Then, 10,000 bootstrap samples
+are generated after which a 95% confidence interval is created for the
+bootstrap distribution of the T statistic.
+
+```{r}
+set.seed(42)
+after_data = data$After8weeks
+n = length(after_data)
+observed_max = max(after_data)
+
+# Range of θ values to test
+theta_values = seq(3, 12, by = 0.1)
+
+# Function for bootstrapping 
+bootstrap_max = function(x, conf_level = 0.95, B = 10000) {
+  alpha = 1 - conf_level
+  
+  # Generate bootstrap resamples and compute max statistic
+  Bstats = lapply(1:B, FUN = function(i) {
+    boot_sample = sample(x, size = length(x), replace = TRUE)
+    max(boot_sample)
+  })
+  
+  Bstats = unlist(Bstats)  # Convert list to numeric vector
+  ci = quantile(Bstats, prob = c(alpha/2, 1 - alpha/2))  # Compute CI
+  
+  return(ci)
+}
+
+cat("Performing Bootstrap Test with 95% Confidence Interval \n")
+
+# Store results
+accepted_theta = c()
+
+# Loop through θ values and apply the bootstrap test
+for (theta in theta_values) {
+  ci = bootstrap_max(after_data, conf_level = 0.95, B = 10000)
+  if (observed_max >= ci[1] & observed_max <= ci[2]) {
+    accepted_theta <- c(accepted_theta, theta)
+  }
+}
+
+if (length(accepted_theta) > 0) {
+  cat("\nValues of θ for which H0 is NOT rejected:\n", accepted_theta, "\n")
+} else {
+  cat("\nH0 is rejected for all θ in [3,12]\n")
+}
+
+# Kolmogorov-Smirnov Test
+if (length(accepted_theta) > 0) {
+  best_theta = mean(accepted_theta)  # Pick an accepted θ (if available)
+  ks_test_result = ks.test(after_data, "punif", min = 3, max = best_theta)
+  
+  cat("\nKolmogorov-Smirnov Test for Uniform(3,", round(best_theta, 2), "):\n")
+  print(ks_test_result)
+} else {
+  cat("\nNo suitable θ found, skipping KS test.\n")
+}
+
+```
+
+```{r}
+set.seed(42)
+
+# Observed test statistic T_max
+T_max_observed <- max(data$After8weeks)
+
+# Bootstrap test function
+bootstrap_test <- function(data, theta, n_bootstrap = 10000) {
+  n <- length(data)
+  T_max_bootstrap <- numeric(n_bootstrap)
+  
+  # Generate bootstrap samples and calculate the max for each
+  for (i in 1:n_bootstrap) {
+    # Resample from Unif[3, theta]
+    resampled_data <- runif(n, min = 3, max = theta)
+    T_max_bootstrap[i] <- max(resampled_data)
+  }
+  
+  # Return the bootstrap distribution of the test statistic
+  return(T_max_bootstrap)
+}
+
+# Function to compute p-value for each theta in [3, 12]
+p_values <- numeric(10)  # To store p-values for different theta values
+thetas <- seq(3, 12, by = 1)  # Theta values to check
+
+for (i in 1:length(thetas)) {
+  theta <- thetas[i]
+  
+  # Perform bootstrap test
+  T_max_bootstrap <- bootstrap_test(data, theta)
+  
+  # Calculate the p-value (proportion of bootstrap statistics greater than observed T_max)
+  p_values[i] <- mean(T_max_bootstrap >= T_max_observed)
+}
+
+# Show p-values for each theta
+data.frame(theta = thetas, p_value = p_values)
+
+# Determine which theta values do not reject H0
+non_rejected_theta <- thetas[p_values >= 0.05]
+cat("Values of theta for which H0 is not rejected (Bootstrap Test):", non_rejected_theta, "\n")
+```
 
 #### e) Using an appropriate test, verify whether the median cholesterol level after 8 weeks of low fat diet is less than 6. Next, design and perform a test to check whether the fraction of the cholesterol levels after 8 weeks of low fat diet less than 4.5 is at most 25%.
 
 ```{r}
 median(data$After8weeks)
-wilcox.test(data$After8weeks, mu = 6, alternative = "less")
+wilcox.test(data$After8weeks, mu = 6, alternative = "less", exact = FALSE)
 
 # Count how many values in After8weeks are less than 4.5
 count_below_4.5 = sum(data$After8weeks < 4.5)
