@@ -6,7 +6,7 @@ library(ggplot2)
 set.seed(0)
 data = read.delim("cholesterol.txt", sep=' ')
 
-# Question 1A:
+################## QUESTION 1A #####################
 
 # A scatter plot for correlation between Before and After8weeks
 plot(data$Before, data$After8weeks, 
@@ -38,10 +38,115 @@ hist(data$After8weeks, probability = TRUE,
      ylab = 'Probability')
 lines(density(data$Before), col = "red", lwd = 2)
 
-# Question 1B:
+
+##################### QUESTION 1B ########################
+
+# H0: The margarine diet has no effect, i.e. the mean cholesterol levels Before and After 8 weeks are the same
+# H1: The margarine diet reduces cholesterol levels --> mean_before > mean_after
+# Paired t-test
+# Assumption: the differences between Before and After should be normally distributed
+# Outcome: if p < 0.05, reject H0
+t.test(data$Before, data$After8weeks, paired = TRUE, alternative = "greater")
+
+# Visualizing distribution of the differences
+difference = data$Before - data$After8weeks
+
+hist(difference, probability = TRUE,
+     main = 'Data distribution of differences between Before and After8weeks',
+     col = 'lightblue',
+     xlab = 'Difference (Before - After8weeks)',
+     ylab = 'Proportion')
+lines(density(difference), col = 'red', lwd = 2)
+
+qqnorm(difference,
+       main = 'QQ-plot for differences',
+       xlab = 'Theoretical Quantiles',
+       ylab = 'Sample Quantiles')
+qqline(difference, col = "red")
+
+# Testing normality of the data
 # If p > 0.05 --> fail to reject normality (data is normal)
-shapiro.test(data$Before)
-shapiro.test(data$After8weeks)
+shapiro.test(difference)
+
+# Doing permutation test:
+# H0: there is no difference between the Before and After8weeks groups
+diff = data$Before - data$After8weeks
+n_permutations = 1000
+observed_mean = mean(diff)
+
+permute_test = function(diff) {
+  permuted_diff <- diff * sample(c(-1, 1), length(diff), replace = TRUE)  # Randomly flip signs
+  return(mean(permuted_diff)) 
+}
+
+set.seed(42)
+permute_distr = replicate(n_permutations, permute_test(diff))
+
+# Histogram of the permutation distribution
+hist(permute_distr, probability = TRUE, col = "gray", 
+     main = "Permutation Test Distribution", xlab = "Mean Differences",
+     xlim = range(c(permute_distr, observed_mean)))  # Adjust x-axis limits
+
+# Add a red line at observed mean difference
+abline(v = observed_mean, col = "red", lwd = 2, lty = 2)
+
+# Print observed mean to check if it is within range
+cat("Observed mean difference:", observed_mean, "\n")
+
+# Compute p-value
+p_value = mean(abs(permute_distr) >= abs(observed_mean))
+cat("Permutation test p-value:", p_value, "\n")
+
+# Doing a Mann-Whitney U-test, as we are testing ordinal data
+# H0: There is no difference in mean cholesterol level in the Before and After groups
+wilcox.test(data$Before, data$After8weeks, paired = TRUE, alternative = "two.sided")
+# H1: cholesterol levels are lower after 8 weeks
+wilcox.test(data$Before, data$After8weeks, paired = TRUE, alternative = "greater")
 
 
+##################### QUESTION 1C ########################
+# calculating 97% CI for mu using t-score
+n = length(data$After8weeks)
+sample_mean = mean(data$After8weeks)
+sample_sd = sd(data$After8weeks)
+critical_value = qt(1-0.015, df=17)
+standard_error = sample_sd / sqrt(n)
+
+left_bound = sample_mean - critical_value * standard_error
+right_bound = sample_mean + critical_value * standard_error
+
+cat("97% Confidence Interval for mu: [", left_bound, ",", right_bound, "]\n")
+
+# calculating 97% CI for mu with bootstrapping
+bootstrap_ci = function(x, conf_level = 0.97, B = 10000) {
+  alpha = 1 - conf_level
+  Bstats = lapply(1:B, FUN = function(i) {
+    boot_sample = sample(x, size = length(x), replace = TRUE)
+    mean(boot_sample)
+  } )
+  Bstats = unlist(Bstats)
+  quantile(Bstats, prob = c(alpha/2, 1-alpha/2))
+}
+
+set.seed(42)
+bootstrap_ci(data$After8weeks)
+
+##################### QUESTION 1D ########################
+
+
+
+
+##################### QUESTION 1E ########################
+median(data$After8weeks)
+wilcox.test(data$After8weeks, mu = 6, alternative = "less")
+
+# Count how many values in After8weeks are less than 4.5
+count_below_4.5 = sum(data$After8weeks < 4.5)
+percentage_below_4.5 = (count_below_4.5 / length(data$After8weeks)) * 100
+cat("Percentage of cholesterol levels below 4.5:", percentage_below_4.5, "%\n")
+
+# H0: The fraction of cholesterol levels below 4.5 is at most 25%
+# H1: The fraction is greater than 25%
+# if the p-value is small (<0.05), we reject H0 and conclude that the fraction is significantly greater than 25%.
+binom.test(count_below_4.5, length(data$After8weeks), p = 0.25, alternative = "greater")
 
