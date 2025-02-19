@@ -149,11 +149,18 @@ summary(model_2)
 # Seems there is no interaction?
 # Check
 
+interaction.plot(dfc$N, dfc$block, dfc$yield)
+interaction.plot(dfc$block, dfc$N, dfc$yield)
 
+# No interaction overall, possible minor interaction between block an N. 
+# p-values where somewhat lower but F-Value significantly lower than other factors
 
 # Critical F-value
 qf(1 - 0.05, df1 = 1, df2 = 10)
 qf(1 - 0.05, df1 = 5, df2 = 10)
+
+model_3 <- aov(yield ~ N + K + block, data = npk)
+summary(model_3)
 
 # START OF 3.e
 
