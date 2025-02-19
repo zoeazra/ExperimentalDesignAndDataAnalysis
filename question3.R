@@ -70,15 +70,6 @@ avg_yield_plot
 
 # START OF 3.c
 
-datac <- npk; npk$block <- as.factor(npk$block); npk$N <- as.factor(npk$N)
-dfc <- npk[c("block", "N", "yield")]
-modelc <- lm(yield ~ block * N, data = dfc); anova(modelc)
-interaction.plot(dfc$N,dfc$block,dfc$yield)
-interaction.plot(dfc$block,dfc$N,dfc$yield)
-
-
-
-
 # ANOVA (two-way)
 # Indpenedent factors: block and N
 # response variable: yield
@@ -149,8 +140,8 @@ summary(model_2)
 # Seems there is no interaction?
 # Check
 
-interaction.plot(dfc$N, dfc$block, dfc$yield)
-interaction.plot(dfc$block, dfc$N, dfc$yield)
+interaction.plot(npk$N, npk$block, npk$yield)
+interaction.plot(npk$block, npk$N, npk$yield)
 
 # No interaction overall, possible minor interaction between block an N. 
 # p-values where somewhat lower but F-Value significantly lower than other factors
@@ -164,3 +155,15 @@ summary(model_3)
 
 # START OF 3.e
 
+#assess data by combinations, group?
+# calc mean yield
+
+npk$N <- factor(npk$N)
+npk$K <- factor(npk$K)
+npk$block <- factor(npk$block)
+
+seperated_groups <- split(npk$yield, list(npk$N, npk$K, npk$block))
+mean_yield <- sapply(seperated_groups, mean)
+yield_summary <- data.frame(combination = names(mean_yield), mean_yield = mean_yield)
+yield_summary <- yield_summary[order(-yield_summary$mean_yield), ]
+yield_summary
