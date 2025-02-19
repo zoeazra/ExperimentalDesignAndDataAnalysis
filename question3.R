@@ -13,8 +13,6 @@ library(lme4)
 data(npk)
 
 # START OF 3.a
-# The yield is not taking into account due to possible unkown variance/ 
-# dependence on factors.
 # rewrite to output data similar to the npk set
 
 # Set block and plot dimensions
@@ -48,15 +46,13 @@ random_distributed
 
 
 # START OF 3.b
-# The yield is only (at this moment) possible to be collected from the dataset 
-# and cannot be randomized due to unkown variance/ dependencies.
 
 # Group npk data by block and N
 grouped_data <- group_by(npk, block, N)
 
 # Calculate the average yield for each group
 average_yield_block = summarise(grouped_data, Average_Yield = mean(yield))
-# average_yield_block
+average_yield_block
 
 # Obtain data for each block where N=0 and N=1
 absent_nitrogen <- filter(average_yield_block, N==0)
@@ -70,124 +66,105 @@ avg_yield_plot <- ggplot(average_yield_block, aes(x = block, y = Average_Yield, 
 
 avg_yield_plot
 
+
 # START OF 3.c
 
-# ANOVA (two-way)
-# Indpenedent factors: block and N
-# response variable: yield
-# perform test to check normality
-
-# Interpreting the table
-# Df = degrees of freedom
-# sum of squares = total var from blocks
-# mean sq = sum of squares for block/degrees of freedom
-# F value = ratio of variation from block to residual
-  # 3.395 times larger than residuals
-#Pr(>F) = p-value for if block significant effect on yield (response variable)
-  # Less than 0.05 so statistically significant (5% level)
-
-# F value N: larger effect on yield compared to block
-# P-value of N is highly significant (1% level)
-
-# residuals sum sq represents variation, unexplainable by block or N
-
-# Both N and p have statistically significant effect, but Nitrogen has a higher 
-# effect on yield.
-
+# Create Two-Way ANOVA for block and N without interaction and response variable yield
 two_way_anova <- aov(yield ~ block + N, data = npk)
 summary(two_way_anova)
+
+# Note: Both N and p have statistically significant effect, but Nitrogen has a higher 
+# effect on yield.
+# NOTE: P-value of N on yield is highly significant (1% level)
+# NOTE: p-value for effect block on yield is less than 0.05 so statistically significant (5% level)
 
 # Friedman is useful when the hypothesis/assumptions of normality and homogeneity 
 # are not met, double check
 
-# Extra, not neccesary?
-# analysis of residuals (normality test)
+# Perform test to check normality
+# Analysis of residuals (normality test)
 qqnorm((residuals)(two_way_anova))
 qqline(residuals(two_way_anova), col = 'red')
 
-# points deviate slightly but more towards the tail
+# Note: Points deviate slightly towards the tail
 
-#distribution in histogram (since slight deviation at tail)
+# Distribution in histogram (since slight deviation at tail)
 hist(residuals(two_way_anova), main = "Histogram of Residuals", xlab = "Residuals", breaks = 10)
 
-# Shapiro Wilk test (since slight deviation at tail)
+# Shapiro Wilk test (Since slight deviation at tail)
 shapiro.test(residuals(two_way_anova))
 
 # p-value 0.6514 ( greater than 0.05) so does not significantly deviate from normality
 # Likely normally distributed
 
-# Tests are met therefore friedman not neccesary
-# Fairly normally distributed, passess p-values, all Hypotheses are accepted
+# Tests are met therefore Friedman not neccesary (expand upon)
+# Fairly normally distributed, passes p-values, all Hypotheses are accepted
 
 
 # START OF 3.d
 
-#Only main effects, without interaction terms
-# assumes no interaction between components 
-
 # Effect of each on yield
 model_1 <- aov(yield ~ N + P + K + block, data = npk)
 summary(model_1)
-#N, K and block have a significant effect on yield
-# P has no significant effect so omitted
+
+# NOTE: N, K and block have a significant effect on yield
+# NOTE: P has no significant effect so can be omitted
 
 # Interactions between N, K and block
 model_2 <- aov(yield ~ N * K + N * block + K * block, data = npk)
 summary(model_2)
 
-# Seems only N really has a significatnt effect, combining models to showcase 
-# that is prefered?
-# Not everything due to overfitting
+# NOTE: P could be ommitted due to statistical insignificance
+model_3 <- aov(yield ~ N + K + block, data = npk)
+summary(model_3)
 
-# Seems there is no interaction?
-# Check
-
+# Check to see if no interaction between variables
 interaction.plot(npk$N, npk$block, npk$yield)
 interaction.plot(npk$block, npk$N, npk$yield)
 
 # No interaction overall, possible minor interaction between block an N. 
-# p-values where somewhat lower but F-Value significantly lower than other factors
 
+# Unnecessary? May delete in final version
 # Critical F-value
-qf(1 - 0.05, df1 = 1, df2 = 10)
-qf(1 - 0.05, df1 = 5, df2 = 10)
+# qf(1 - 0.05, df1 = 1, df2 = 10)
+# qf(1 - 0.05, df1 = 5, df2 = 10)
 
-model_3 <- aov(yield ~ N + K + block, data = npk)
-summary(model_3)
 
 # START OF 3.e
 
-#assess data by combinations, group?
-# calc mean yield
-
+# Unclear if mandatory
 #npk$N <- factor(npk$N)
 #npk$K <- factor(npk$K)
 #npk$block <- factor(npk$block)
 
+# Calculate the mean yield of all groups separated by pressence of factors
 seperated_groups <- split(npk$yield, list(npk$N, npk$K, npk$block))
 mean_yield <- sapply(seperated_groups, mean)
-combination <- paste(npk$N, npk$K, npk$block)
 
+combination <- paste(npk$N, npk$K, npk$block)
 yield_summary <- aggregate(yield ~ combination, data = npk, FUN = mean)
+
+# Order from high to low yield
 yield_summary <- yield_summary[order(-yield_summary$yield), ]
 yield_summary
 
+# Apply TukeyHSD 
 tukey_results <- TukeyHSD(model_3)
 tukey_results
 summary(tukey_results)
 
-# From the TukeyHSD results we see that K has a significant negative impact on yield.
+# NOTE: From the TukeyHSD results we see that K has a significant negative impact on yield.
 # Therefore the best combination for model 3 (where we do not consider P) is N = 1 and K = 0
 # Block factor introduces variability with block 3 having the overall biggest positive impact and block 1 a relatively lower yield
 
 
 # START OF 3e
 
-# make mixed effects model
+# Create a Mixed effects model with all factors.
 mixed_effects_model <- lmer(yield ~ N + P + K + (1 | block), data = npk)
 summary(mixed_effects_model)
 
-# Similarly to the additive model, we can conclude that N has a significant (5.617)
+# NOTE: Similarly to the additive model, we can conclude that N has a significant (5.617)
 # positive effect on yield. K has a statistically significant negative effect on yield (-3.983)
 # And P has a non significant negative effect on yield. (-1.183)
 # Blocks have significant variability in data, with random effects variance of 13.16.
