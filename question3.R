@@ -2,11 +2,13 @@
 # install.packages('MASS')
 # install.packages('ggplot2')
 # install.packages ('dplyr')
+# install.packages("lme4")
 
 # Load the packages and dataset
 library(MASS)
 library(dplyr)
 library(ggplot2)
+library(lme4)
 
 data(npk)
 
@@ -177,3 +179,19 @@ summary(tukey_results)
 # From the TukeyHSD results we see that K has a significant negative impact on yield.
 # Therefore the best combination for model 3 (where we do not consider P) is N = 1 and K = 0
 # Block factor introduces variability with block 3 having the overall biggest positive impact and block 1 a relatively lower yield
+
+
+# START OF 3e
+
+# make mixed effects model
+mixed_effects_model <- lmer(yield ~ N + P + K + (1 | block), data = npk)
+summary(mixed_effects_model)
+
+# Similarly to the additive model, we can conclude that N has a significant (5.617)
+# positive effect on yield. K has a statistically significant negative effect on yield (-3.983)
+# And P has a non significant negative effect on yield. (-1.183)
+# Blocks have significant variability in data, with random effects variance of 13.16.
+# mixed effects model further solidifies the stance that N has a significant impact on yield.
+
+# Further notes on the mixed effects model: better representation, blocks introduce 
+# random variance and not fixed systemic effects such as N, P and K
