@@ -658,6 +658,15 @@ model_3 <- aov(yield ~ N + K + block, data = npk)
 summary(model_3)
 ```
 
-### e) For the resulting model from d), investigate how the involved factors influence *yield*. Which combination of the levels of the factors in the model leads to the largest yield?
+### Section e 
+To investigate the influence of the factors on the *yield*, we will perform a Tukey's Honest Significant Difference (HSD) test.
+
+```{r}
+# Apply TukeyHSD 
+tukey_results <- TukeyHSD(model_3)
+tukey_results
+```
+
+From the TukeyHSD results we see that K has a significant negative impact on yield. Therefore we can say that the best combination for model 3 (where we do not consider *P*) is *N* = 1 and *K* = 0. Additionally, the *block* factor introduces variability with *block* 3 having the overall biggest positive impact and *block* 1 a relatively lower yield. 
 
     #### f) Recall the main question of interest. In this light, for the resulting model from d) perform a mixed eﬀects analysis, modeling the block variable as a random eﬀect by using the function *lmer*. Compare your results to the results found by using the fixed eﬀects model. (You will need to install the R-package *lme4*, which is not included in the standard distribution of R.)
