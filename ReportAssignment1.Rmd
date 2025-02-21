@@ -622,8 +622,7 @@ shapiro.test(residuals(two_way_anova_main))
 ```
 From the Shapiro-Wilk test we receive a p-value greater than 0.05, combined with the Q-Q and histogram it is likely normally distributed.
 
-Tests are met therefore Friedman not neccesary (expand upon): A Friedman test is not neccesary. Although we have introduced random factors with the blocks, it is not fully randomized as we set limitations to the additives per block.
-Fairly normally distributed, passes p-values, all Hypotheses are accepted
+Tests indicate a normal distribution of the residuals and the data is continuous. We can therefore say that a non-parametric designed test such as a Friedman test is not applicable. Additionally, We have limited in-block variation due to a randomized block design with continuous data which is more applicable to the ANOVA model design.
 
 
     #### d) Investigate other possible models with all the factors combined, restricting to only one (pair-wise) interaction term of factors *N*, *P* and *K* with block in one model (no need to check the model assumptions for all the models). Test for the presence of main eﬀects of *N*, *P* and *K*, possibly taking into account factor *block*. Give your favorite model and motivate your choice.
