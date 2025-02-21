@@ -587,37 +587,42 @@ From the graph we can note that there seems to be a correlation between a higher
 
 ### Section c: Conduct a full two-way ANOVA with the response variable *yield* and the two factors *block* and *N*. Was it sensible to include factor *block* into this model? Can we also apply the Friedman test for this situation?
 
-A full two-way ANOVA is conducted with the response variable *yield* and the two factors *block* and *N*.
+A full two-way ANOVA is conducted with the response variable *yield* and the two factors *block* and *N*. We start with a main effects model.
 
 ```{r, echo=FALSE}
-two_way_anova <- aov(yield ~ block + N, data = npk)
-summary(two_way_anova)
+two_way_anova_main <- aov(yield ~ block + N, data = npk)
+summary(two_way_anova_main)
 ```
-With a p-value of 0.0071 and 0.0262 respectively, the ANOVA signifies that both the nitrogen additive and block factor have statistically significant effects on the yield of peas with nitrogen having a larger effect compared to the block. However, we might say that the block factor merely introduces variability in the samples and do not represent fixed system effects. Including the block factor is, however, important to understand the amount of variability it may cause. 
+We then compute an interaction model.
+```{r, echo=FALSE}
+two_way_anova_int <- aov(yield ~ block * N, data = npk)
+summary(two_way_anova_int)
+```
 
-To solidify our findings we also perform an analysis on the residuals with a normality test and a plot of the distribution with a histogram.
+With a p-value of 0.0071 and 0.0262 respectively in the main effects model, the ANOVA signifies that both the nitrogen additive and block factor have statistically significant effects on the yield of peas with nitrogen having a larger effect compared to the block. However, we might say that the block factor merely introduces variability in the samples and do not represent fixed system effects. Including the block factor is, however, important to understand the amount of variability it may cause. In the interaction model both factors again have a p-value below 0.05. Additionally, we notice that there is no statistically significant effect on the yield from an interaction between nitrogen and yield.
+
+To solidify our findings we perform an analysis on the residuals of the main effects model with a normality test and a plot of the distribution with a histogram.
 
 ```{r, echo=FALSE}
 # Analysis of residuals (normality test)
-qqnorm((residuals)(two_way_anova))
-qqline(residuals(two_way_anova), col = 'red')
+qqnorm((residuals)(two_way_anova_main))
+qqline(residuals(two_way_anova_main), col = 'red')
 
 # Distribution in histogram (since slight deviation at tail)
-hist(residuals(two_way_anova), main = "Histogram of Residuals", xlab = "Residuals", breaks = 10)
+hist(residuals(two_way_anova_main), main = "Histogram of Residuals", xlab = "Residuals", breaks = 10)
 
 ```
 
-We note that there is a slight deviation at the tail of the normality test. This could be explained by ... We might, however, investigate this further with a Shapiro Wilk test.
+We note that there is a slight deviation at the tail of the normality test which we investigate this further with a Shapiro Wilk test.
 
 
 ```{r, echo=FALSE}
 # Shapiro Wilk test (Since slight deviation at tail)
-shapiro.test(residuals(two_way_anova))
+shapiro.test(residuals(two_way_anova_main))
 ```
-p-value 0.6514 ( greater than 0.05) so does not significantly deviate from normality
-Likely normally distributed
+From the Shapiro-Wilk test we receive a p-value greater than 0.05, combined with the Q-Q and histogram it is likely normally distributed.
 
-Tests are met therefore Friedman not neccesary (expand upon)
+Tests are met therefore Friedman not neccesary (expand upon): A Friedman test is not neccesary. Although we have introduced random factors with the blocks, it is not fully randomized as we set limitations to the additives per block.
 Fairly normally distributed, passes p-values, all Hypotheses are accepted
 
 
