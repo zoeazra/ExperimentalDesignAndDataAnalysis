@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999995 (TeX Live 2023) (preloaded format=xelatex 2023.9.4)  19 FEB 2025 17:57
+This is XeTeX, Version 3.141592653-2.6-0.999995 (TeX Live 2023) (preloaded format=xelatex 2023.9.4)  21 FEB 2025 13:12
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -790,7 +790,7 @@ LaTeX Font Info:    Font shape `TU/lmtt/bx/n' in size <10.95> not available
 
 Overfull \hbox (13.13985pt too wide) in paragraph at lines 127--127
 []\TU/lmtt/m/n/10.95 ##  /var/folders/lt/3tf47cnj2n5f1w0d_h6xmyvr0000gn/T//Rtmp
-kF8jT5/downloaded_packages[] 
+rm8PQR/downloaded_packages[] 
  []
 
 File: ReportAssignment1_files/figure-latex/unnamed-chunk-3-1.pdf Graphic file (
@@ -844,35 +844,40 @@ Overfull \hbox (1.64236pt too wide) in paragraph at lines 513--513
 File: ReportAssignment1_files/figure-latex/unnamed-chunk-16-1.pdf Graphic file 
 (type pdf)
 <use ReportAssignment1_files/figure-latex/unnamed-chunk-16-1.pdf>
+File: ReportAssignment1_files/figure-latex/unnamed-chunk-17-1.pdf Graphic file 
+(type pdf)
+<use ReportAssignment1_files/figure-latex/unnamed-chunk-17-1.pdf>
 File: ReportAssignment1_files/figure-latex/unnamed-chunk-18-1.pdf Graphic file 
 (type pdf)
 <use ReportAssignment1_files/figure-latex/unnamed-chunk-18-1.pdf>
 [12]
-File: ReportAssignment1_files/figure-latex/unnamed-chunk-19-1.pdf Graphic file 
+Overfull \hbox (47.63237pt too wide) in paragraph at lines 666--666
+[]\TU/lmtt/m/n/10.95 ## [1] "These are the p-values of the Shapiro-Wilk test fo
+r model_a: p = 0.099, W = 0.941"[] 
+ []
+
+[13]
+File: ReportAssignment1_files/figure-latex/unnamed-chunk-25-1.pdf Graphic file 
 (type pdf)
-<use ReportAssignment1_files/figure-latex/unnamed-chunk-19-1.pdf>
-File: ReportAssignment1_files/figure-latex/unnamed-chunk-20-1.pdf Graphic file 
-(type pdf)
-<use ReportAssignment1_files/figure-latex/unnamed-chunk-20-1.pdf>
-[13] [14] [15]
-File: ReportAssignment1_files/figure-latex/unnamed-chunk-28-1.pdf Graphic file 
-(type pdf)
-<use ReportAssignment1_files/figure-latex/unnamed-chunk-28-1.pdf>
-File: ReportAssignment1_files/figure-latex/unnamed-chunk-29-1.pdf Graphic file 
-(type pdf)
-<use ReportAssignment1_files/figure-latex/unnamed-chunk-29-1.pdf>
-[16] [17] [18] [19] (./ReportAssignment1.aux)
+<use ReportAssignment1_files/figure-latex/unnamed-chunk-25-1.pdf>
+[14]
+Overfull \hbox (105.11986pt too wide) in paragraph at lines 798--798
+[]\TU/lmtt/m/n/10.95 ## [1] "These are the p-values of the Shapiro-Wilk test fo
+r model_county_size: p = 0.733, W = 0.977"[] 
+ []
+
+[15] [16] [17] (./ReportAssignment1.aux)
 
 LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
  ) 
 Here is how much of TeX's memory you used:
- 19163 strings out of 476683
- 359051 string characters out of 5804048
- 1859018 words of memory out of 5000000
- 39148 multiletter control sequences out of 15000+600000
+ 19147 strings out of 476683
+ 358111 string characters out of 5804048
+ 1858018 words of memory out of 5000000
+ 39134 multiletter control sequences out of 15000+600000
  515893 words of font info for 67 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 86i,6n,121p,1640b,524s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 86i,6n,121p,1640b,540s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on ReportAssignment1.pdf (19 pages).
+Output written on ReportAssignment1.pdf (17 pages).
