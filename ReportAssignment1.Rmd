@@ -526,7 +526,7 @@ than the instability of the model’s coefficient estimates.
 
 # Exercise 3
   
-Here, we will explore the effect of different additives on the yield of peas with a primary focus on nitrogen. Other additives are potassium and phosphorus. The data is obtained through the MASS package library (npk) and represents 6 blocks of soil, each containing 4 plots. Each block contains exactly two of each additive and no plot can have two of the same additive.
+Here, we will explore the effect of different additives on the yield of peas with a primary focus on nitrogen (*N*). Other additives are potassium (*K*) and phosphorus (*P*). The data is obtained through the MASS package library (npk) and represents 6 blocks of soil, each containing 4 plots. Each *block* contains exactly two of each additive and no plot can have two of the same additive.
 
 We start by loading the neccesary npk dataset from the MASS package.
     
@@ -534,7 +534,6 @@ We start by loading the neccesary npk dataset from the MASS package.
 library(MASS)
 data(npk)
 ```
-
 
 ### Section a
     
@@ -562,9 +561,8 @@ To optimize possible future instances of a random plot distribution process we c
     }
     ```
 
-
 ### Section b 
-From the npk data a bar graph is generated to report the average yield per block in the presence (1) and absence (0) of Nitrogen.
+From the npk data a bar graph is generated to report the average *yield* per *block* in the presence (1) and absence (0) of *N*.
        
     ```{r, echo=FALSE, fig.width = 6, fig.height = 4}
     # Group npk data by block and N
@@ -583,9 +581,9 @@ From the npk data a bar graph is generated to report the average yield per block
     avg_yield_plot
     ```
 
-From the graph we can note that there seems to be a correlation between a higher yield and the presence of the additive Nitrogen in the plot soil. We will further investigate this hypothesis with different tests such as a full two-way ANOVA. The block factor is not of interest but is applied to group plot tests and may introduce variability within the samples.
+From the graph we can note that there seems to be a correlation between a higher *yield* and the presence of the additive *N* in the plot soil. We will further investigate this hypothesis with different tests such as a full two-way ANOVA. The *block* factor is not of interest but is applied to group plot tests and may introduce variability within the samples.
 
-### Section c: Conduct a full two-way ANOVA with the response variable *yield* and the two factors *block* and *N*. Was it sensible to include factor *block* into this model? Can we also apply the Friedman test for this situation?
+### Section c
 
 A full two-way ANOVA is conducted with the response variable *yield* and the two factors *block* and *N*. We start with a main effects model.
 
@@ -599,11 +597,11 @@ two_way_anova_int <- aov(yield ~ block * N, data = npk)
 summary(two_way_anova_int)
 ```
 
-With a p-value of 0.0071 and 0.0262 respectively in the main effects model, the ANOVA signifies that both the nitrogen additive and block factor have statistically significant effects on the yield of peas with nitrogen having a larger effect compared to the block. However, we might say that the block factor merely introduces variability in the samples and do not represent fixed system effects. Including the block factor is, however, important to understand the amount of variability it may cause. In the interaction model both factors again have a p-value below 0.05. Additionally, we notice that there is no statistically significant effect on the yield from an interaction between nitrogen and yield.
+With a p-value of 0.0071 and 0.0262 respectively in the main effects model, the ANOVA signifies that both the *N* additive and *block* factor have statistically significant effects on the yield of peas with nitrogen having a larger effect compared to the block. However, we might say that the *block* factor merely introduces variability in the samples and do not represent fixed system effects. Including the *block* factor is, however, important to understand the amount of variability it may cause. In the interaction model both factors again have a p-value below 0.05. Additionally, we notice that there is no statistically significant effect on the *yield* from an interaction between *N* and *yield*.
 
 To solidify our findings we perform an analysis on the residuals of the main effects model with a normality test and a plot of the distribution with a histogram.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.width = 6, fig.height = 4.5}
 # Analysis of residuals (normality test)
 qqnorm((residuals)(two_way_anova_main))
 qqline(residuals(two_way_anova_main), col = 'red')
@@ -614,8 +612,6 @@ hist(residuals(two_way_anova_main), main = "Histogram of Residuals", xlab = "Res
 ```
 
 We note that there is a slight deviation at the tail of the normality test which we investigate this further with a Shapiro Wilk test.
-
-
 ```{r, echo=FALSE}
 # Shapiro Wilk test (Since slight deviation at tail)
 shapiro.test(residuals(two_way_anova_main))
@@ -625,28 +621,35 @@ From the Shapiro-Wilk test we receive a p-value greater than 0.05, combined with
 Tests indicate a normal distribution of the residuals and the data is continuous. We can therefore say that a non-parametric designed test such as a Friedman test is not applicable. Additionally, We have limited in-block variation due to a randomized block design with continuous data which is more applicable to the ANOVA model design.
 
 ### Section d 
+
 To investigate the effects of other variables and any other possible interactions we explore more models. We first test for the presence of additional main effects from all additives and the block factor.
-```{r}
+```{r, echo=FALSE}
 # Main effect model of all factors
 model_1 <- aov(yield ~ N + P + K + block, data = npk)
 summary(model_1)
 ```
 
-We now learn that potassium has a statistically significant effect on the yield with a p-value of 0.02767. From this main effects model we therefore learn that only phosphor does not contribute significantly, we will therefore omit phosphor in subsequent models. 
+We now learn that potassium has a statistically significant effect on the yield with a p-value of 0.02767. From this main effects model we therefore learn that only *P* does not contribute significantly, we will therefore omit *P* in subsequent models. 
 
 Next, we explore the interaction between potassium and the other remaining main effect variables *N* and *block*. 
 
-```{r}
+```{r, echo=FALSE}
 # Interaction model between N, K and block
 model_2 <- aov(yield ~ N * K + K * block, data = npk)
 summary(model_2)
 ```
 From the data we learn that there is no significant interaction between the different factors. We further explore this with an interaction plot.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.width = 6, fig.height = 4.5}
 # Check to see if no interaction between variables
-interaction.plot(npk$N, npk$block, npk$yield)
-interaction.plot(npk$block, npk$N, npk$yield)
+interaction.plot(npk$N, npk$block, npk$yield,
+                 xlab = "Nitrogen (N)", 
+                 ylab = "Yield", 
+                 trace.label = "Block")
+interaction.plot(npk$block, npk$N, npk$yield,
+                 xlab = "Block", 
+                 ylab = "Nitrogen (N)", 
+                 trace.label = "Yield")
 ```
 
 From this plot we only observe a minor possible interaction between *block* and *N*. However, due to the overall linearity we suspect the interaction to be mostly negligible. 
@@ -667,7 +670,7 @@ tukey_results <- TukeyHSD(model_3)
 tukey_results
 ```
 
-From the TukeyHSD results we see that K has a significant negative impact on yield. Therefore we can say that the best combination for model 3 (where we do not consider *P*) is *N* = 1 and *K* = 0. Additionally, the *block* factor introduces variability with *block* 3 having the overall biggest positive impact and *block* 1 a relatively lower yield. 
+From the TukeyHSD results we see that K has a significant negative impact on yield. Therefore we can say that the best combination for model 3 (where we do not consider *P*) is *N* = 1 and *K* = 0. Additionally, the *block* factor introduces variability with *block* 3 having the overall biggest positive impact and *block* 1 a relatively lower *yield*. 
 
 ### Section f 
 
