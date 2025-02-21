@@ -27,7 +27,7 @@ random_distributed <- data.frame(block = rep(n_blocks, each = n_plots),
                                  K = rep(0, n_plots*n_blocks))
 
 # Iterate over blocks for index and sampling
-for (block in n_blocks) {
+for (block in 1:n_blocks) {
   
   idx <- (n_plots * (block-1) + 1): (n_plots * block)
   
