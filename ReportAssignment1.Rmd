@@ -530,10 +530,10 @@ Here, we will explore the effect of different additives on the yield of peas wit
 
 We start by loading the neccesary npk dataset from the MASS package.
     
-    ```{r}
-    library(MASS)
-    data(npk)
-    ```
+```{r}
+library(MASS)
+data(npk)
+```
 
 
 ### Section a
@@ -583,10 +583,42 @@ From the npk data a bar graph is generated to report the average yield per block
     avg_yield_plot
     ```
 
-From the graph we can note that there seems to be a correlation between a higher yield and the presence of the additive Nitrogen in the plot soil. To further investigate this hypothesis a full two-way ANOVA will be conducted.
+From the graph we can note that there seems to be a correlation between a higher yield and the presence of the additive Nitrogen in the plot soil. We will further investigate this hypothesis with different tests such as a full two-way ANOVA. The block factor is not of interest but is applied to group plot tests and may introduce variability within the samples.
 
 ### Section c: Conduct a full two-way ANOVA with the response variable *yield* and the two factors *block* and *N*. Was it sensible to include factor *block* into this model? Can we also apply the Friedman test for this situation?
 
+A full two-way ANOVA is conducted with the response variable *yield* and the two factors *block* and *N*.
+
+```{r, echo=FALSE}
+two_way_anova <- aov(yield ~ block + N, data = npk)
+summary(two_way_anova)
+```
+With a p-value of 0.0071 and 0.0262 respectively, the ANOVA signifies that both the nitrogen additive and block factor have statistically significant effects on the yield of peas with nitrogen having a larger effect compared to the block. However, we might say that the block factor merely introduces variability in the samples and do not represent fixed system effects. Including the block factor is, however, important to understand the amount of variability it may cause. 
+
+To solidify our findings we also perform an analysis on the residuals with a normality test and a plot of the distribution with a histogram.
+
+```{r, echo=FALSE}
+# Analysis of residuals (normality test)
+qqnorm((residuals)(two_way_anova))
+qqline(residuals(two_way_anova), col = 'red')
+
+# Distribution in histogram (since slight deviation at tail)
+hist(residuals(two_way_anova), main = "Histogram of Residuals", xlab = "Residuals", breaks = 10)
+
+```
+
+We note that there is a slight deviation at the tail of the normality test. This could be explained by ... We might, however, investigate this further with a Shapiro Wilk test.
+
+
+```{r, echo=FALSE}
+# Shapiro Wilk test (Since slight deviation at tail)
+shapiro.test(residuals(two_way_anova))
+```
+p-value 0.6514 ( greater than 0.05) so does not significantly deviate from normality
+Likely normally distributed
+
+Tests are met therefore Friedman not neccesary (expand upon)
+Fairly normally distributed, passes p-values, all Hypotheses are accepted
 
 
     #### d) Investigate other possible models with all the factors combined, restricting to only one (pair-wise) interaction term of factors *N*, *P* and *K* with block in one model (no need to check the model assumptions for all the models). Test for the presence of main eﬀects of *N*, *P* and *K*, possibly taking into account factor *block*. Give your favorite model and motivate your choice.
