@@ -420,6 +420,7 @@ evidence that the proportion of cholesterol levels below 4.5 is greater
 than 25%.
 
 ```{r}
+count_below_4.5 = sum(data$After8weeks < 4.5)
 binom_result = binom.test(count_below_4.5, length(data$After8weeks), p = 0.25, alternative = "greater")
 ```
 
