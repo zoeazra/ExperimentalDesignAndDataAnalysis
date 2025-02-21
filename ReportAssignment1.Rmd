@@ -624,9 +624,40 @@ From the Shapiro-Wilk test we receive a p-value greater than 0.05, combined with
 
 Tests indicate a normal distribution of the residuals and the data is continuous. We can therefore say that a non-parametric designed test such as a Friedman test is not applicable. Additionally, We have limited in-block variation due to a randomized block design with continuous data which is more applicable to the ANOVA model design.
 
+### Section d 
+To investigate the effects of other variables and any other possible interactions we explore more models. We first test for the presence of additional main effects from all additives and the block factor.
+```{r}
+# Main effect model of all factors
+model_1 <- aov(yield ~ N + P + K + block, data = npk)
+summary(model_1)
+```
 
-    #### d) Investigate other possible models with all the factors combined, restricting to only one (pair-wise) interaction term of factors *N*, *P* and *K* with block in one model (no need to check the model assumptions for all the models). Test for the presence of main eﬀects of *N*, *P* and *K*, possibly taking into account factor *block*. Give your favorite model and motivate your choice.
+We now learn that potassium has a statistically significant effect on the yield with a p-value of 0.02767. From this main effects model we therefore learn that only phosphor does not contribute significantly, we will therefore omit phosphor in subsequent models. 
 
-    #### e) For the resulting model from d), investigate how the involved factors influence *yield*. Which combination of the levels of the factors in the model leads to the largest yield?
+Next, we explore the interaction between potassium and the other remaining main effect variables *N* and *block*. 
+
+```{r}
+# Interaction model between N, K and block
+model_2 <- aov(yield ~ N * K + K * block, data = npk)
+summary(model_2)
+```
+From the data we learn that there is no significant interaction between the different factors. We further explore this with an interaction plot.
+
+```{r, echo=FALSE}
+# Check to see if no interaction between variables
+interaction.plot(npk$N, npk$block, npk$yield)
+interaction.plot(npk$block, npk$N, npk$yield)
+```
+
+From this plot we only observe a minor possible interaction between *block* and *N*. However, due to the overall linearity we suspect the interaction to be mostly negligible. 
+
+We will therefore approach a main effects model where we leave out phosphor to omit arbitrary data and prevent overfitting. The main effect model will include factors *N*, *K* and *block* 
+```{r}
+# NOTE: P could be omitted due to statistical insignificance
+model_3 <- aov(yield ~ N + K + block, data = npk)
+summary(model_3)
+```
+
+### e) For the resulting model from d), investigate how the involved factors influence *yield*. Which combination of the levels of the factors in the model leads to the largest yield?
 
     #### f) Recall the main question of interest. In this light, for the resulting model from d) perform a mixed eﬀects analysis, modeling the block variable as a random eﬀect by using the function *lmer*. Compare your results to the results found by using the fixed eﬀects model. (You will need to install the R-package *lme4*, which is not included in the standard distribution of R.)
