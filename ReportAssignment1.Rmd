@@ -267,15 +267,11 @@ We want to investigate whether two factors County and Related (and
 possibly their interaction) influence the crops by performing relevant
 ANOVA model(s), without taking Size into account. So we create and test
 3 separate Null Hypotheses with a two-way ANOVA and a one-way ANOVA on
-the additive model:
+the additive model: H\_(01): no main effect of factor County, H\_(02):
+no main effect of factor Related and H\_(03): no interactions between
+factors County and Related
 
--   H\_(01): no main effect of factor County
-
--   H\_(02): no main effect of factor Related
-
--   H\_(03): no interactions between factors County and Related
-
-```{r}
+```{r, echo=FALSE}
 model_a <- lm(Crops ~ County * Related, data = crops_data)
 anova(model_a)
 ```
@@ -295,7 +291,7 @@ For both: The p-value (0.879) is much greater than 0.05, meaning we fail
 to reject the null hypothesis H\_(03), implying there is no significant
 interaction between County and Related on the Crops variable.
 
-```{r}
+```{r, echo=FALSE}
 summary(model_a)
 ```
 
@@ -354,16 +350,7 @@ High p-values suggest no strong differences, consistent with the
 boxplot, where distributions overlap, medians are close, and no outliers
 appear.
 
-Finally, we have to check the model assumptions
-
-```{r, echo=FALSE, fig.width = 6, fig.height = 3 }
-par(mfrow=c(1,2))
-qqnorm(residuals(model_a))
-qqline(residuals(model_a), col = "red", lwd = 2) 
-plot(fitted(model_a), residuals(model_a))
-
-
-```
+Finally, we have to check the model assumptions for normality
 
 ```{r, echo=FALSE}
 p_value <- round(shapiro.test(residuals(model_a))$p.value, 3)
@@ -379,6 +366,14 @@ random distribution of residuals. The Shapiro-Wilk test (W = 0.941, p =
 level. Given the small sample size (n = 30), results should be
 interpreted with caution, as minor departures from normality can impact
 statistical inference.
+
+```{r, echo=FALSE, fig.width = 6, fig.height = 3 }
+par(mfrow=c(1,2))
+qqnorm(residuals(model_a))
+qqline(residuals(model_a), col = "red", lwd = 2) 
+plot(fitted(model_a), residuals(model_a))
+
+```
 
 To estimate crop yields for County 3 when the landlord and tenant are
 unrelated, we use the emmeans function to calculate the adjusted mean
@@ -412,7 +407,7 @@ We define 3 different models:
     the interaction between County and Size. It does not include an
     interaction term for Related.
 
-```{r}
+```{r, echo=FALSE}
 model_county_size <- lm(Crops ~ Size * County + Related, data = crops_data)
 anova(model_county_size)
 ```
@@ -422,7 +417,7 @@ anova(model_county_size)
     and Size to test if the effect of Size on crop yields depends on
     whether the landlord and tenant are related.
 
-```{r}
+```{r, echo=FALSE}
 model_related_size <- lm(Crops ~ Size * Related + County, data = crops_data)
 anova(model_related_size)
 ```
@@ -432,7 +427,7 @@ anova(model_related_size)
     interaction effects, only the individual contributions of County,
     Related, and Size to crop yields.
 
-```{r}
+```{r, echo=FALSE}
 model_additive <- lm(Crops ~ Size + County + Related, data = crops_data)
 anova(model_additive)
 ```
@@ -465,7 +460,7 @@ QQ-plot’s linear pattern.
 
 ### Section c
 
-```{r}
+```{r, echo=FALSE}
 summary(model_county_size)
 ```
 
@@ -499,7 +494,7 @@ Crops.
 
 ### Section d
 
-```{r}
+```{r, echo=FALSE}
 pred <- emmeans::emmeans(model_county_size, specs = ~ County * Related * Size, 
                 at = list(County = "2", Size = 165, Related = "yes"))
 
@@ -525,83 +520,115 @@ variation (random noise or factors not captured by the model), rather
 than the instability of the model’s coefficient estimates.
 
 # Exercise 3
-  
-Here, we will explore the effect of different additives on the yield of peas with a primary focus on nitrogen (*N*). Other additives are potassium (*K*) and phosphorus (*P*). The data is obtained through the MASS package library (npk) and represents 6 blocks of soil, each containing 4 plots. Each *block* contains exactly two of each additive and no plot can have two of the same additive.
+
+Here, we will explore the effect of different additives on the yield of
+peas with a primary focus on nitrogen (*N*). Other additives are
+potassium (*K*) and phosphorus (*P*). The data is obtained through the
+MASS package library (npk) and represents 6 blocks of soil, each
+containing 4 plots. Each *block* contains exactly two of each additive
+and no plot can have two of the same additive.
 
 We start by loading the neccesary npk dataset from the MASS package.
-    
-```{r, echo=FALSE}
+
+```{r include=FALSE}
 library(MASS)
+library(ggplot2)
+library(dplyr)
 data(npk)
 ```
 
 ### Section a
-    
-To optimize possible future instances of a random plot distribution process we create a data frame similar to that of the npk data such that it may be utilized similarly.
-    
-    ```{r}
-    # Set block and plot dimensions
-    n_blocks <- 6
-    n_plots <- 4
 
-    # Create a data frame to randomly distribute over blocks
-    random_distributed <- data.frame(block = rep(1:n_blocks, each = n_plots),
-                                     N = rep(0, n_plots*n_blocks),
-                                     P = rep(0, n_plots*n_blocks),
-                                     K = rep(0, n_plots*n_blocks))
+To optimize possible future instances of a random plot distribution
+process we create a data frame similar to that of the npk data such that
+it may be utilized similarly.
 
-    # Iterate over blocks for index and sampling
-    for (block in 1:n_blocks) {
+```{r}
+# Set block and plot dimensions
+n_blocks <- 6
+n_plots <- 4
+
+# Create a data frame to randomly distribute over blocks
+random_distributed <- data.frame(block = rep(1:n_blocks, each = n_plots),
+                                 N = rep(0, n_plots*n_blocks),
+                                 P = rep(0, n_plots*n_blocks),
+                                 K = rep(0, n_plots*n_blocks))
+
+# Iterate over blocks for index and sampling
+for (block in 1:n_blocks) {
   
-      idx <- (n_plots * (block-1) + 1): (n_plots * block)
+  idx <- (n_plots * (block-1) + 1): (n_plots * block)
   
-      random_distributed[sample(idx, 2), "N"] <- 1
-      random_distributed[sample(idx, 2), "P"] <- 1
-      random_distributed[sample(idx, 2), "K"] <- 1
-    }
-    ```
+  random_distributed[sample(idx, 2), "N"] <- 1
+  random_distributed[sample(idx, 2), "P"] <- 1
+  random_distributed[sample(idx, 2), "K"] <- 1
+}
+```
 
-### Section b 
-From the npk data a bar graph is generated to report the average *yield* per *block* in the presence (1) and absence (0) of *N*.
-       
-    ```{r, echo=FALSE, fig.width = 6, fig.height = 4}
-    # Group npk data by block and N
-    grouped_data <- group_by(npk, block, N)
-    
-    # Calculate the average yield for each group
-    average_yield_block <- summarise(grouped_data, Average_Yield = mean(yield), .groups = "keep")
-    
-    # Plot the average yield
-    avg_yield_plot <- ggplot(average_yield_block, 
-        aes(x = factor(block), y = Average_Yield, fill = factor(N))) + 
-      geom_bar(stat = "identity", position = "dodge") +
-      labs(x = "Block Number", y = "Average Yield", fill = "Nitrogen") +
-      ggtitle("Average Yield per Block, With and Without Nitrogen")
-    
-    avg_yield_plot
-    ```
+### Section b
 
-From the graph we can note that there seems to be a correlation between a higher *yield* and the presence of the additive *N* in the plot soil. We will further investigate this hypothesis with different tests such as a full two-way ANOVA. The *block* factor is not of interest but is applied to group plot tests and may introduce variability within the samples.
+From the npk data a bar graph is generated to report the average *yield*
+per *block* in the presence (1) and absence (0) of *N*.
+
+```{r, echo=FALSE, fig.width = 4, fig.height = 2}
+# Group npk data by block and N
+grouped_data <- group_by(npk, block, N)
+
+# Calculate the average yield for each group
+average_yield_block <- summarise(grouped_data, Average_Yield = mean(yield), .groups = "keep")
+
+# Plot the average yield
+avg_yield_plot <- ggplot(average_yield_block, 
+    aes(x = factor(block), y = Average_Yield, fill = factor(N))) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Block Number", y = "Average Yield", fill = "Nitrogen") +
+  ggtitle("Average Yield per Block, With and Without Nitrogen")
+
+avg_yield_plot
+
+```
+
+From the graph we can note that there seems to be a correlation between
+a higher *yield* and the presence of the additive *N* in the plot soil.
+We will further investigate this hypothesis with different tests such as
+a full two-way ANOVA. The *block* factor is not of interest but is
+applied to group plot tests and may introduce variability within the
+samples.
 
 ### Section c
 
-A full two-way ANOVA is conducted with the response variable *yield* and the two factors *block* and *N*. We start with a main effects model.
+A full two-way ANOVA is conducted with the response variable *yield* and
+the two factors *block* and *N*. We start with a main effects model.
 
 ```{r, echo=FALSE}
 two_way_anova_main <- aov(yield ~ block + N, data = npk)
 summary(two_way_anova_main)
 ```
+
 We then compute an interaction model.
+
 ```{r, echo=FALSE}
 two_way_anova_int <- aov(yield ~ block * N, data = npk)
 summary(two_way_anova_int)
 ```
 
-With a p-value of 0.0071 and 0.0262 respectively in the main effects model, the ANOVA signifies that both the *N* additive and *block* factor have statistically significant effects on the yield of peas with nitrogen having a larger effect compared to the block. However, we might say that the *block* factor merely introduces variability in the samples and do not represent fixed system effects. Including the *block* factor is, however, important to understand the amount of variability it may cause. In the interaction model both factors again have a p-value below 0.05. Additionally, we notice that there is no statistically significant effect on the *yield* from an interaction between *N* and *yield*.
+With a p-value of 0.0071 and 0.0262 respectively in the main effects
+model, the ANOVA signifies that both the *N* additive and *block* factor
+have statistically significant effects on the yield of peas with
+nitrogen having a larger effect compared to the block. However, we might
+say that the *block* factor merely introduces variability in the samples
+and do not represent fixed system effects. Including the *block* factor
+is, however, important to understand the amount of variability it may
+cause. In the interaction model both factors again have a p-value below
+0.05. Additionally, we notice that there is no statistically significant
+effect on the *yield* from an interaction between *N* and *yield*.
 
-To solidify our findings we perform an analysis on the residuals of the main effects model with a normality test and a plot of the distribution with a histogram.
+To solidify our findings we perform an analysis on the residuals of the
+main effects model with a normality test and a plot of the distribution
+with a histogram.
 
-```{r, echo=FALSE, fig.width = 6, fig.height = 4.5}
+```{r, echo=FALSE, fig.width = 6, fig.height = 3}
+par(mfrow=c(1,2))
 # Analysis of residuals (normality test)
 qqnorm((residuals)(two_way_anova_main))
 qqline(residuals(two_way_anova_main), col = 'red')
@@ -611,36 +638,54 @@ hist(residuals(two_way_anova_main), main = "Histogram of Residuals", xlab = "Res
 
 ```
 
-We note that there is a slight deviation at the tail of the normality test which we investigate this further with a Shapiro Wilk test.
+We note that there is a slight deviation at the tail of the normality
+test which we investigate this further with a Shapiro Wilk test.
+
 ```{r, echo=FALSE}
 # Shapiro Wilk test (Since slight deviation at tail)
 shapiro.test(residuals(two_way_anova_main))
 ```
-From the Shapiro-Wilk test we receive a p-value greater than 0.05, combined with the Q-Q and histogram it is likely normally distributed.
 
-Tests indicate a normal distribution of the residuals and the data is continuous. We can therefore say that a non-parametric designed test such as a Friedman test is not applicable. Additionally, We have limited in-block variation due to a randomized block design with continuous data which is more applicable to the ANOVA model design.
+From the Shapiro-Wilk test we receive a p-value greater than 0.05,
+combined with the Q-Q and histogram it is likely normally distributed.
 
-### Section d 
+Tests indicate a normal distribution of the residuals and the data is
+continuous. We can therefore say that a non-parametric designed test
+such as a Friedman test is not applicable. Additionally, We have limited
+in-block variation due to a randomized block design with continuous data
+which is more applicable to the ANOVA model design.
 
-To investigate the effects of other variables and any other possible interactions we explore more models. We first test for the presence of additional main effects from all additives and the block factor.
+### Section d
+
+To investigate the effects of other variables and any other possible
+interactions we explore more models. We first test for the presence of
+additional main effects from all additives and the block factor.
+
 ```{r, echo=FALSE}
 # Main effect model of all factors
 model_1 <- aov(yield ~ N + P + K + block, data = npk)
 summary(model_1)
 ```
 
-We now learn that potassium has a statistically significant effect on the yield with a p-value of 0.02767. From this main effects model we therefore learn that only *P* does not contribute significantly, we will therefore omit *P* in subsequent models. 
+We now learn that potassium has a statistically significant effect on
+the yield with a p-value of 0.02767. From this main effects model we
+therefore learn that only *P* does not contribute significantly, we will
+therefore omit *P* in subsequent models.
 
-Next, we explore the interaction between potassium and the other remaining main effect variables *N* and *block*. 
+Next, we explore the interaction between potassium and the other
+remaining main effect variables *N* and *block*.
 
 ```{r, echo=FALSE}
 # Interaction model between N, K and block
 model_2 <- aov(yield ~ N * K + K * block, data = npk)
 summary(model_2)
 ```
-From the data we learn that there is no significant interaction between the different factors. We further explore this with an interaction plot.
 
-```{r, echo=FALSE, fig.width = 6, fig.height = 4.5}
+From the data we learn that there is no significant interaction between
+the different factors. We further explore this with an interaction plot.
+
+```{r, echo=FALSE, fig.width = 6, fig.height = 3}
+par(mfrow=c(1,2))
 # Check to see if no interaction between variables
 interaction.plot(npk$N, npk$block, npk$yield,
                  xlab = "Nitrogen (N)", 
@@ -652,17 +697,24 @@ interaction.plot(npk$block, npk$N, npk$yield,
                  trace.label = "Yield")
 ```
 
-From this plot we only observe a minor possible interaction between *block* and *N*. However, due to the overall linearity we suspect the interaction to be mostly negligible. 
+From this plot we only observe a minor possible interaction between
+*block* and *N*. However, due to the overall linearity we suspect the
+interaction to be mostly negligible.
 
-We will therefore approach a main effects model where we leave out phosphor to omit arbitrary data and prevent overfitting. The main effect model will include factors *N*, *K* and *block* 
+We will therefore approach a main effects model where we leave out
+phosphor to omit arbitrary data and prevent overfitting. The main effect
+model will include factors *N*, *K* and *block*
+
 ```{r}
 # NOTE: P could be omitted due to statistical insignificance
 model_3 <- aov(yield ~ N + K + block, data = npk)
 summary(model_3)
 ```
 
-### Section e 
-To investigate the influence of the factors on the *yield*, we will perform a Tukey's Honest Significant Difference (HSD) test.
+### Section e
+
+To investigate the influence of the factors on the *yield*, we will
+perform a Tukey's Honest Significant Difference (HSD) test.
 
 ```{r}
 # Apply TukeyHSD 
@@ -670,15 +722,32 @@ tukey_results <- TukeyHSD(model_3)
 tukey_results
 ```
 
-From the TukeyHSD results we see that K has a significant negative impact on yield. Therefore we can say that the best combination for model 3 (where we do not consider *P*) is *N* = 1 and *K* = 0. Additionally, the *block* factor introduces variability with *block* 3 having the overall biggest positive impact and *block* 1 a relatively lower *yield*. 
+From the TukeyHSD results we see that K has a significant negative
+impact on yield. Therefore we can say that the best combination for
+model 3 (where we do not consider *P*) is *N* = 1 and *K* = 0.
+Additionally, the *block* factor introduces variability with *block* 3
+having the overall biggest positive impact and *block* 1 a relatively
+lower *yield*.
 
-### Section f 
+### Section f
 
-Finally, we create a mixed effects analysis for our chosen main effect model with factors *N*, *K* and *block* where we model *block* as a random effect.
+Finally, we create a mixed effects analysis for our chosen main effect
+model with factors *N*, *K* and *block* where we model *block* as a
+random effect.
+
 ```{r, echo=FALSE}
 # Create a Mixed effects model with all chosen factors.
-mixed_effects_model <- lmer(yield ~ N + K + (1 | block), data = npk)
+mixed_effects_model <- lme4::lmer(yield ~ N + K + (1 | block), data = npk)
 summary(mixed_effects_model)
 ```
 
-Similarly to the additive model, we can conclude that *N* has a significant (5.617) positive effect on the *yield* with a p-value of 0.00302, whereas *K* has a statistically significant negative effect on the *yield* (-3.983) with a p-value of 0.02487. This analysis shows that *blocks* have significant variability in data, with a random effects variance of 13.16. This mixed effects model further solidifies the stance that *N* has a significant impact on *yield*. We further note that the mixed effects model may provide a better representation, since *blocks* introduce random variance and not fixed systemic effects such as *N*, *P* and *K*.
+Similarly to the additive model, we can conclude that *N* has a
+significant (5.617) positive effect on the *yield* with a p-value of
+0.00302, whereas *K* has a statistically significant negative effect on
+the *yield* (-3.983) with a p-value of 0.02487. This analysis shows that
+*blocks* have significant variability in data, with a random effects
+variance of 13.16. This mixed effects model further solidifies the
+stance that *N* has a significant impact on *yield*. We further note
+that the mixed effects model may provide a better representation, since
+*blocks* introduce random variance and not fixed systemic effects such
+as *N*, *P* and *K*.
