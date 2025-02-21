@@ -89,11 +89,11 @@ shapiro_after = shapiro.test(data$After8weeks)
 
 ```{r, echo=FALSE}
 # Extract and round values
-rounded_W_before <- round(shapiro_before$statistic, 3)
-rounded_p_before <- round(shapiro_before$p.value, 3)
+rounded_W_before = round(shapiro_before$statistic, 3)
+rounded_p_before = round(shapiro_before$p.value, 3)
 
-rounded_W_after <- round(shapiro_after$statistic, 3)
-rounded_p_after <- round(shapiro_after$p.value, 3)
+rounded_W_after = round(shapiro_after$statistic, 3)
+rounded_p_after = round(shapiro_after$p.value, 3)
 
 # Print formatted results
 cat("Shapiro-Wilk Test for Before:\n")
@@ -163,6 +163,7 @@ suggest a major departure from normality, making parametric tests like
 the paired t-test reasonable.
 
 ```{r, echo=FALSE}
+difference = data$Before - data$After8weeks
 par(mfrow = c(1,2))
 hist(difference, freq = TRUE,
      main = 'Data distribution of the \n mean difference',
@@ -370,13 +371,16 @@ recorded, and the p-value is computed by comparing the observed
 maximum(*T_max_observed*) with the bootstrap distribution (*t_star*).
 
 ```{r}
-accepted_theta = c(8, 9, 10, 11)
+accepted_theta <- c(8, 9, 10, 11)
 
 for (theta in accepted_theta) {
-  ks_test_result = ks.test(data$After8weeks, "punif", min = 3, max = theta)
-  
+  ks_test_result <- ks.test(data$After8weeks, "punif", min = 3, max = theta)
+
+  rounded_statistic <- round(ks_test_result$statistic, 3)
+  rounded_p_value <- formatC(ks_test_result$p.value, format = "e", digits = 3)
   cat("\nKolmogorov-Smirnov Test for Uniform(3,", theta, "):\n")
-  print(round(ks_test_result, 3))
+  cat("D-statistic:", rounded_statistic, "\n")
+  cat("P-value:", rounded_p_value, "\n")
 }
 
 ```
