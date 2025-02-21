@@ -1,6 +1,6 @@
 ---
 title: "Assignment 1 - Report"
-author: "Name, Eleni Liarou, Zoë Azra Blei, group 20"
+author: "Name, Eleni Liarou, Zoë Azra Blei, Frederieke Loth, group 20"
 date: "23 February 2025"
 output: pdf_document
 fontsize: 11pt
@@ -555,8 +555,41 @@ editor_options:
     variation rather than parameter estimation.
 
     # Exercise 3
+    
+    We start by loading the neccesary npk dataset from the MASS package.
+    
+    ```{r}
+    library(MASS)
+    data(npk)
+    ```
+
 
     #### a) Present an R-code for the randomization process to distribute soil additives over plots in such a way that each soil additive is received exactly by two plots within each block.
+    
+    To optimize possible future utilization of the random process we create a data frame similar to that of the npk data such that it may be utilized similarly.
+    
+    ```{r}
+    # Set block and plot dimensions
+    n_blocks <- 6
+    n_plots <- 4
+
+    # Create a data frame to randomly distribute over blocks
+    random_distributed <- data.frame(block = rep(1:n_blocks, each = n_plots),
+                                     N = rep(0, n_plots*n_blocks),
+                                     P = rep(0, n_plots*n_blocks),
+                                     K = rep(0, n_plots*n_blocks))
+
+    # Iterate over blocks for index and sampling
+    for (block in 1:n_blocks) {
+  
+      idx <- (n_plots * (block-1) + 1): (n_plots * block)
+  
+      random_distributed[sample(idx, 2), "N"] <- 1
+      random_distributed[sample(idx, 2), "P"] <- 1
+      random_distributed[sample(idx, 2), "K"] <- 1
+    }
+    ```
+
 
     #### b) Make a plot to show the average yield per block for the soil treated with nitrogen and for the soil that did not receive nitrogen, and comment.
 

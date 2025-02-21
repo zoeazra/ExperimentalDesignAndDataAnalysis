@@ -14,7 +14,6 @@ data(npk)
 
 
 # START OF 3.a
-# rewrite to output data similar to the npk set
 
 # Set block and plot dimensions
 n_blocks <- 6
