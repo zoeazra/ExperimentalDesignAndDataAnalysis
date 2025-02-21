@@ -592,6 +592,30 @@ editor_options:
 
 
     #### b) Make a plot to show the average yield per block for the soil treated with nitrogen and for the soil that did not receive nitrogen, and comment.
+    
+       
+    ```{r}
+    # Group npk data by block and N
+    grouped_data <- group_by(npk, block, N)
+    
+    # Calculate the average yield for each group
+    average_yield_block = summarise(grouped_data, Average_Yield = mean(yield))
+    average_yield_block
+    
+    # Obtain data for each block where N=0 and N=1
+    absent_nitrogen <- filter(average_yield_block, N==0)
+    present_nitrogen <- filter(average_yield_block, N==1)
+    
+    # Plot the average yield
+    avg_yield_plot <- ggplot(average_yield_block, 
+        aes(x = block, y = block, Average_Yield, fill = N)) + 
+      geom_bar(stat = "identity", position = "dodge") +
+      labs(x = "Block Number", y = "Average Yield", fill = "Nitrogen") +
+      ggtitle("Average Yield per Block, With and Without Nitrogen")
+    
+    avg_yield_plot
+    ```
+
 
     #### c) Conduct a full two-way ANOVA with the response variable *yield* and the two factors *block* and *N*. Was it sensible to include factor *block* into this model? Can we also apply the Friedman test for this situation?
 
