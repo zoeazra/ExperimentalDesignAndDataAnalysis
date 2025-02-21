@@ -669,4 +669,13 @@ tukey_results
 
 From the TukeyHSD results we see that K has a significant negative impact on yield. Therefore we can say that the best combination for model 3 (where we do not consider *P*) is *N* = 1 and *K* = 0. Additionally, the *block* factor introduces variability with *block* 3 having the overall biggest positive impact and *block* 1 a relatively lower yield. 
 
-    #### f) Recall the main question of interest. In this light, for the resulting model from d) perform a mixed eﬀects analysis, modeling the block variable as a random eﬀect by using the function *lmer*. Compare your results to the results found by using the fixed eﬀects model. (You will need to install the R-package *lme4*, which is not included in the standard distribution of R.)
+### Section f 
+
+Finally, we create a mixed effects analysis for our chosen main effect model with factors *N*, *K* and *block* where we model *block* as a random effect.
+```{r, echo=FALSE}
+# Create a Mixed effects model with all chosen factors.
+mixed_effects_model <- lmer(yield ~ N + K + (1 | block), data = npk)
+summary(mixed_effects_model)
+```
+
+Similarly to the additive model, we can conclude that *N* has a significant (5.617) positive effect on the *yield* with a p-value of 0.00302, whereas *K* has a statistically significant negative effect on the *yield* (-3.983) with a p-value of 0.02487. This analysis shows that *blocks* have significant variability in data, with a random effects variance of 13.16. This mixed effects model further solidifies the stance that *N* has a significant impact on *yield*. We further note that the mixed effects model may provide a better representation, since *blocks* introduce random variance and not fixed systemic effects such as *N*, *P* and *K*.
