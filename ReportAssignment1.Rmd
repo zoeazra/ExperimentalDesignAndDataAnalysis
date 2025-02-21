@@ -528,9 +528,9 @@ than the instability of the model’s coefficient estimates.
   
 Here, we will explore the effect of different additives on the yield of peas with a primary focus on nitrogen (*N*). Other additives are potassium (*K*) and phosphorus (*P*). The data is obtained through the MASS package library (npk) and represents 6 blocks of soil, each containing 4 plots. Each *block* contains exactly two of each additive and no plot can have two of the same additive.
 
-We start by loading the neccesary npk dataset from the MASS package.
+We start by loading the neccesary npk dataset from the MASS package and other packages.
     
-```{r}
+```{r, echo=FALSE}
 library(MASS)
 data(npk)
 ```
