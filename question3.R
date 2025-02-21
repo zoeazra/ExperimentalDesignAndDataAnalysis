@@ -21,7 +21,7 @@ n_blocks <- 6
 n_plots <- 4
 
 # Create a dataframe to randomly distribute over blocks
-random_distributed <- data.frame(block = rep(n_blocks, each = n_plots),
+random_distributed <- data.frame(block = rep(1:n_blocks, each = n_plots),
                                  N = rep(0, n_plots*n_blocks),
                                  P = rep(0, n_plots*n_blocks),
                                  K = rep(0, n_plots*n_blocks))
