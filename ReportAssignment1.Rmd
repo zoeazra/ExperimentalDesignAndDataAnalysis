@@ -580,7 +580,7 @@ two_way_anova_int <- aov(yield ~ block * N, data = npk)
 summary(two_way_anova_int)
 ```
 
-With a p-value of 0.0071 and 0.0262 respectively in the main effects model, the ANOVA signifies that both the *N* additive and *block* factor have statistically significant effects on the yield of peas with nitrogen having a larger effect compared to the block. However, we might say that the *block* factor merely introduces variability in the samples and do not represent fixed system effects. Including the *block* factor is, however, important to understand the amount of variability it may cause. In the interaction model both factors again have a p-value below 0.05. Additionally, we notice that there is no statistically significant effect on the *yield* from an interaction between *N* and *yield*.
+With a p-value of 0.0071 and 0.0262 respectively in the main effects model, the ANOVA signifies that both the *N* additive and *block* factor have statistically significant effects on the yield of peas with nitrogen having a larger effect compared to the block. However, we might say that the *block* factor merely introduces variability in the samples and do not represent fixed system effects. Including the *block* factor is, however, important to understand the amount of variability it may cause. In the interaction model both factors again have a p-value below 0.05. Additionally, we notice that there is no statistically significant effect on the *yield* from an interaction between *N* and *block*.
 
 To solidify our findings we perform an analysis on the residuals of the main effects model with a normality test and a plot of the distribution with a histogram.
 
@@ -646,7 +646,7 @@ From this plot we only observe a minor possible interaction between *block* and 
 We will therefore approach a main effects model where we leave out phosphor to omit arbitrary data and prevent overfitting. The main effect model will include factors *N*, *K* and *block*
 
 ```{r}
-# NOTE: P could be omitted due to statistical insignificance
+# P could be omitted due to statistical insignificance
 model_3 <- aov(yield ~ N + K + block, data = npk)
 summary(model_3)
 ```
