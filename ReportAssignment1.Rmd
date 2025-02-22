@@ -1,6 +1,6 @@
 ---
 title: "Assignment 1 - Report"
-author: "Name, Eleni Liarou, Zoë Azra Blei, Frederieke Loth, group 20"
+author: "Eleni Liarou, Zoë Azra Blei, Frederieke Loth, group 20"
 date: "23 February 2025"
 output:
   pdf_document:
@@ -278,21 +278,23 @@ anova(model_a)
 
 From this table we can see the following:
 
-For County: The p-value (0.476) is greater than 0.05, meaning we fail to
-reject the null hypothesis H\_(01), suggesting that there is no
-significant effect of the County on the Crops variable.
+For County: The County p-value \> 0.05, meaning we fail to reject the
+null hypothesis H\_(01), suggesting that there is no significant effect
+of the County on the Crops variable.
 
-For Related: The p-value (0.527) is also greater than 0.05, meaning we
-fail to reject the null hypothesis H\_(02), which suggests that there is
-no significant effect of whether the landlord and tenant are related on
-the Crops variable.
+For Related: The Related p-value \> 0.05, meaning we fail to reject the
+null hypothesis H\_(02), which suggests that there is no significant
+effect of whether the landlord and tenant are related on the Crops
+variable.
 
-For both: The p-value (0.879) is much greater than 0.05, meaning we fail
-to reject the null hypothesis H\_(03), implying there is no significant
-interaction between County and Related on the Crops variable.
+For both: The Interaction p-value \> 0.05, meaning we fail to reject the
+null hypothesis H\_(03), implying there is no significant interaction
+between County and Related on the Crops variable.
 
 ```{r, echo=FALSE}
-summary(model_a)
+model_summary <- summary(model_a)
+cat("These are the coefficients:\n")
+print(model_summary$coefficients)
 ```
 
 The above model summary table aligns with the ANOVA p-values as both
@@ -355,17 +357,16 @@ Finally, we have to check the model assumptions for normality
 ```{r, echo=FALSE}
 p_value <- round(shapiro.test(residuals(model_a))$p.value, 3)
 statistic <- round(shapiro.test(residuals(model_a))$statistic, 3)
-print(sprintf("These are the p-values of the Shapiro-Wilk test for model_a: p = %.3f, W = %.3f", p_value, statistic))
+print(sprintf("Shapiro-Wilk test for model_a: p = %.3f, W = %.3f", p_value, statistic))
 ```
 
 The Q-Q plot shows deviations from normality, particularly in the tails,
 but the overall trend follows the theoretical quantiles. The residuals
 vs. fitted plot suggests no strong patterns, indicating an approximately
-random distribution of residuals. The Shapiro-Wilk test (W = 0.941, p =
-0.099) fails to reject the null hypothesis of normality at the 0.05
-level. Given the small sample size (n = 30), results should be
-interpreted with caution, as minor departures from normality can impact
-statistical inference.
+random distribution of residuals. The Shapiro-Wilk test fails to reject
+the null hypothesis of normality at the 0.05 level. Given the small
+sample size (n = 30), results should be interpreted with caution, as
+minor departures from normality can impact statistical inference.
 
 ```{r, echo=FALSE, fig.width = 6, fig.height = 3 }
 par(mfrow=c(1,2))
@@ -402,30 +403,27 @@ crops_data$Crops <- as.numeric(crops_data$Crops)
 
 We define 3 different models:
 
-1.  Model_county_size: This model examines how crop yields are
-    influenced by County, Related, and Size, with an additional focus on
-    the interaction between County and Size. It does not include an
-    interaction term for Related.
+1.  Model_county_size: Examines the effects of County, Related, and Size
+    on crop yield, focusing on the County × Size interaction but
+    excluding Related interactions.
 
 ```{r, echo=FALSE}
 model_county_size <- lm(Crops ~ Size * County + Related, data = crops_data)
 anova(model_county_size)
 ```
 
-2.  Model_related_size: This model evaluates how County, Related, and
-    Size affect crop yields, and it adds an interaction term for Related
-    and Size to test if the effect of Size on crop yields depends on
-    whether the landlord and tenant are related.
+2.  Model_related_size: Evaluates the effects of County, Related, and
+    Size on crop yield, adding a Related × Size interaction to test if
+    Size’s effect depends on landlord-tenant relation.
 
 ```{r, echo=FALSE}
 model_related_size <- lm(Crops ~ Size * Related + County, data = crops_data)
 anova(model_related_size)
 ```
 
-3.  Model_additive: This model assumes that the effect of each factor on
-    crop yield is independent of the others. It does not test for any
-    interaction effects, only the individual contributions of County,
-    Related, and Size to crop yields.
+3.  Model_additive: Assumes each factor affects crop yield
+    independently, without testing interactions—only the individual
+    effects of County, Related, and Size.
 
 ```{r, echo=FALSE}
 model_additive <- lm(Crops ~ Size + County + Related, data = crops_data)
@@ -434,8 +432,8 @@ anova(model_additive)
 
 We have tested interaction models as well as purely additive. The
 interaction Size-Related and the individual effect of County and Related
-are insignificant(all 3 have p-values\>0.5). Therefore, the best model
-is model_county_size, since it shows the significance of Size and of the
+are insignificant(p-values\>0.5). Therefore, the best model is
+model_county_size, since it shows the significance of Size and of the
 interaction Size-County.
 
 Finally, we can check this model's assumptions.
@@ -451,17 +449,20 @@ plot(fitted(model_county_size), residuals(model_county_size))
 p_value <- round(shapiro.test(residuals(model_county_size))$p.value, 3)
 statistic <- round(shapiro.test(residuals(model_county_size))$statistic, 3)
 
-print(sprintf("These are the p-values of the Shapiro-Wilk test for model_county_size: p = %.3f, W = %.3f", p_value, statistic))
+print(sprintf("Shapiro-Wilk test for model_county_size: p = %.3f, W = %.3f", p_value, statistic))
 ```
 
-The Shapiro-Wilk test for model_county_size residuals ( p = 0.733 )
-suggests no significant deviation from normality, supported by the
-QQ-plot’s linear pattern.
+The Shapiro-Wilk test for model_county_size residuals suggests no
+significant deviation from normality, supported by the QQ-plot’s linear
+pattern.
 
 ### Section c
 
 ```{r, echo=FALSE}
-summary(model_county_size)
+model_summary <- summary(model_county_size)
+cat("These are the coefficients:\n")
+print(model_summary$coefficients) # Extracts only the coefficients
+cat("\nThis is the R-squared value:", model_summary$r.squared, "\n")
 ```
 
 The coefficient for Size is 22.704 (p\<0.001), meaning that in County 1
@@ -481,16 +482,16 @@ confidently conclude a difference from County 1. The model explains
 86.6% of the variation in Crops (R²=0.866), indicating strong
 explanatory power. 
 
-```{r}
+```{r, echo=FALSE}
 confint(model_county_size)
 ```
 
-The confidence intervals confirm that Size has a strong, statistically
-significant positive effect, and that County 2 and the Size:County2
-interaction also have significant effects. In contrast, the confidence
-intervals for County 3, Related, and Size:County3 include zero, meaning
-there is no strong evidence that these factors significantly influence
-Crops.
+The above confidence intervals confirm that Size has a strong,
+statistically significant positive effect, and that County 2 and the
+Size:County2 interaction also have significant effects. In contrast, the
+confidence intervals for County 3, Related, and Size:County3 include
+zero, meaning there is no strong evidence that these factors
+significantly influence Crops.
 
 ### Section d
 
