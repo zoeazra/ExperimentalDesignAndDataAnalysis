@@ -12,9 +12,7 @@ highlight: tango
 ::: {style="text-align: justify;"}
 # Exercise 1: Cholesterol
 
-First we load and read the necessary data set
-
-```{r}
+```{r, echo=FALSE}
 data = read.delim("cholesterol.txt", sep=' ')
 ```
 
@@ -33,8 +31,6 @@ qqline(data$After8weeks, col = "red")
 
 ```
 
-To further explore the normality assumption, histograms below are plotted for both *Before* and *After8weeks*. The histograms exhibit a roughly bell-shaped distribution, which supports the assumption of normality.
-
 ```{r, echo=FALSE, fig.width=6, fig.height=3}
 par(mfrow = c(1,2))  
 
@@ -50,6 +46,8 @@ hist(data$After8weeks, probability = TRUE,
      ylab = 'Probability')
 lines(density(data$After8weeks), col = "red", lwd = 2)
 ```
+
+To further explore the normality assumption, above histograms are plotted for both *Before* and *After8weeks*. The histograms exhibit a roughly bell-shaped distribution, which supports the assumption of normality.
 
 However, to address normality more formally, a Shapiro-Wilk test is conducted, as this test is suitable to test for normality for small data sets. The null hypothesis is as follows:
 
@@ -69,8 +67,6 @@ cat("**Shapiro-Wilk Test for After 8 Weeks: **",
     "W-statistic =", round(shapiro_after$statistic, 3), ", p-value =", round(shapiro_after$p.value, 3), "\n")
 ```
 
-In order to investigate the relationship between the columns of *Before* and *After8weeks* a scatter plot is created below. The scatter plot demonstrates a strong positive correlation between 'Before' and 'After8weeks' cholesterol levels. The data points align closely with the red regression line, suggesting that individuals with higher cholesterol levels before the diet intervention also tend to have higher cholesterol levels after 8 weeks. This indicates that while cholesterol levels may have decreased, there remains a strong relationship between pre- and post-diet measurements.
-
 ```{r, echo=FALSE, fig.width=5, fig.height=3}
 plot(data$Before, data$After8weeks, 
      main = 'Regression for Before and After8weeks', 
@@ -78,6 +74,8 @@ plot(data$Before, data$After8weeks,
      ylab='After')
 abline(lm(After8weeks ~ Before, data = data), col = "red")
 ```
+
+In order to investigate the relationship between the columns of *Before* and *After8weeks* a scatter plot is created above. The scatter plot demonstrates a strong positive correlation between 'Before' and 'After8weeks' cholesterol levels. The data points align closely with the red regression line, suggesting that individuals with higher cholesterol levels before the diet intervention also tend to have higher cholesterol levels after 8 weeks. This indicates that while cholesterol levels may have decreased, there remains a strong relationship between pre- and post-diet measurements.
 
 To quantify this correlation, the Pearson’s correlation coefficient is calculated below. A high Pearson correlation (close to 1) indicates a strong positive relationship between the two columns. The correlation coefficient exhibits a value of approximately 0.99, confirming the strong positive relationship. Additionally, the p-value is smaller than 0.05, indicating that the correlation is statistically significant.
 
@@ -315,15 +313,9 @@ cat("Number of successes:", count_below_4.5, ", Number of trials:", length(data$
   
 ```
 
-### Section a
+#### Section a
 
-We want to investigate whether two factors County and Related (and
-possibly their interaction) influence the crops by performing relevant
-ANOVA model(s), without taking Size into account. So we create and test
-3 separate Null Hypotheses with a two-way ANOVA and a one-way ANOVA on
-the additive model: H\_(01): no main effect of factor County, H\_(02):
-no main effect of factor Related and H\_(03): no interactions between
-factors County and Related
+We want to investigate whether two factors County and Related (and possibly their interaction) influence the crops by performing relevant ANOVA model(s), without taking Size into account. So we create and test 3 separate Null Hypotheses with a two-way ANOVA and a one-way ANOVA on the additive model: H\_(01): no main effect of factor County, H\_(02): no main effect of factor Related and H\_(03): no interactions between factors County and Related
 
 ```{r, echo=FALSE}
 model_a <- lm(Crops ~ County * Related, data = crops_data)
@@ -332,18 +324,11 @@ anova(model_a)
 
 From this table we can see the following:
 
-For County: The County p-value \> 0.05, meaning we fail to reject the
-null hypothesis H\_(01), suggesting that there is no significant effect
-of the County on the Crops variable.
+For County: The County p-value \> 0.05, meaning we fail to reject the null hypothesis H\_(01), suggesting that there is no significant effect of the County on the Crops variable.
 
-For Related: The Related p-value \> 0.05, meaning we fail to reject the
-null hypothesis H\_(02), which suggests that there is no significant
-effect of whether the landlord and tenant are related on the Crops
-variable.
+For Related: The Related p-value \> 0.05, meaning we fail to reject the null hypothesis H\_(02), which suggests that there is no significant effect of whether the landlord and tenant are related on the Crops variable.
 
-For both: The Interaction p-value \> 0.05, meaning we fail to reject the
-null hypothesis H\_(03), implying there is no significant interaction
-between County and Related on the Crops variable.
+For both: The Interaction p-value \> 0.05, meaning we fail to reject the null hypothesis H\_(03), implying there is no significant interaction between County and Related on the Crops variable.
 
 ```{r, echo=FALSE}
 model_summary <- summary(model_a)
@@ -375,9 +360,7 @@ interaction.plot(x.factor = crops_data$Related,
 
 ```
 
-In the above interaction plots the lines seem parallel, therefore
-interaction seems to not be present, verifying the two-way anova
-results.
+In the above interaction plots the lines seem parallel, therefore interaction seems to not be present, verifying the two-way anova results.
 
 ```{r, echo=FALSE, fig.width = 6, fig.height = 3}
 par(mfrow = c(1, 2))  # Set layout for two side-by-side plots
@@ -399,10 +382,7 @@ boxplot(Crops ~ Related, data = crops_data,
 
 ```
 
-ANOVA shows no significant effect of County or Related on crop yield.
-High p-values suggest no strong differences, consistent with the
-boxplot, where distributions overlap, medians are close, and no outliers
-appear.
+ANOVA shows no significant effect of County or Related on crop yield. High p-values suggest no strong differences, consistent with the boxplot, where distributions overlap, medians are close, and no outliers appear.
 
 Finally, we have to check the model assumptions for normality
 
@@ -412,13 +392,7 @@ statistic <- round(shapiro.test(residuals(model_a))$statistic, 3)
 print(sprintf("Shapiro-Wilk test for model_a: p = %.3f, W = %.3f", p_value, statistic))
 ```
 
-The Q-Q plot shows deviations from normality, particularly in the tails,
-but the overall trend follows the theoretical quantiles. The residuals
-vs. fitted plot suggests no strong patterns, indicating an approximately
-random distribution of residuals. The Shapiro-Wilk test fails to reject
-the null hypothesis of normality at the 0.05 level. Given the small
-sample size (n = 30), results should be interpreted with caution, as
-minor departures from normality can impact statistical inference.
+The Q-Q plot shows deviations from normality, particularly in the tails, but the overall trend follows the theoretical quantiles. The residuals vs. fitted plot suggests no strong patterns, indicating an approximately random distribution of residuals. The Shapiro-Wilk test fails to reject the null hypothesis of normality at the 0.05 level. Given the small sample size (n = 30), results should be interpreted with caution, as minor departures from normality can impact statistical inference.
 
 ```{r, echo=FALSE, fig.width = 6, fig.height = 3 }
 par(mfrow=c(1,2))
@@ -428,12 +402,7 @@ plot(fitted(model_a), residuals(model_a))
 
 ```
 
-To estimate crop yields for County 3 when the landlord and tenant are
-unrelated, we use the emmeans function to calculate the adjusted mean
-yield. This estimation is based on model_a, which incorporates the
-County-Size interaction. The emmeans function provides the estimated
-marginal means, accounting for the effects of County and Related while
-adjusting for interactions.
+To estimate crop yields for County 3 when the landlord and tenant are unrelated, we use the emmeans function to calculate the adjusted mean yield. This estimation is based on model_a, which incorporates the County-Size interaction. The emmeans function provides the estimated marginal means, accounting for the effects of County and Related while adjusting for interactions.
 
 ```{r, echo=FALSE}
 emm_results <- emmeans::emmeans(model_a, ~ County * Related)
@@ -444,7 +413,7 @@ cat("Estimated crops for County 3 (Landlord and Tenant NOT related):", county3_n
 
 ```
 
-### Section b
+#### Section b
 
 ```{r, echo=FALSE}
 crops_data$County <- as.factor(crops_data$County)
@@ -455,38 +424,28 @@ crops_data$Crops <- as.numeric(crops_data$Crops)
 
 We define 3 different models:
 
-1.  Model_county_size: Examines the effects of County, Related, and Size
-    on crop yield, focusing on the County × Size interaction but
-    excluding Related interactions.
+1.  Model_county_size: Examines the effects of County, Related, and Size on crop yield, focusing on the County × Size interaction but excluding Related interactions.
 
 ```{r, echo=FALSE}
 model_county_size <- lm(Crops ~ Size * County + Related, data = crops_data)
 anova(model_county_size)
 ```
 
-2.  Model_related_size: Evaluates the effects of County, Related, and
-    Size on crop yield, adding a Related × Size interaction to test if
-    Size’s effect depends on landlord-tenant relation.
+2.  Model_related_size: Evaluates the effects of County, Related, and Size on crop yield, adding a Related × Size interaction to test if Size’s effect depends on landlord-tenant relation.
 
 ```{r, echo=FALSE}
 model_related_size <- lm(Crops ~ Size * Related + County, data = crops_data)
 anova(model_related_size)
 ```
 
-3.  Model_additive: Assumes each factor affects crop yield
-    independently, without testing interactions—only the individual
-    effects of County, Related, and Size.
+3.  Model_additive: Assumes each factor affects crop yield independently, without testing interactions—only the individual effects of County, Related, and Size.
 
 ```{r, echo=FALSE}
 model_additive <- lm(Crops ~ Size + County + Related, data = crops_data)
 anova(model_additive)
 ```
 
-We have tested interaction models as well as purely additive. The
-interaction Size-Related and the individual effect of County and Related
-are insignificant(p-values\>0.5). Therefore, the best model is
-model_county_size, since it shows the significance of Size and of the
-interaction Size-County.
+We have tested interaction models as well as purely additive. The interaction Size-Related and the individual effect of County and Related are insignificant(p-values\>0.5). Therefore, the best model is model_county_size, since it shows the significance of Size and of the interaction Size-County.
 
 Finally, we can check this model's assumptions.
 
@@ -504,11 +463,9 @@ statistic <- round(shapiro.test(residuals(model_county_size))$statistic, 3)
 print(sprintf("Shapiro-Wilk test for model_county_size: p = %.3f, W = %.3f", p_value, statistic))
 ```
 
-The Shapiro-Wilk test for model_county_size residuals suggests no
-significant deviation from normality, supported by the QQ-plot’s linear
-pattern.
+The Shapiro-Wilk test for model_county_size residuals suggests no significant deviation from normality, supported by the QQ-plot’s linear pattern.
 
-### Section c
+#### Section c
 
 ```{r, echo=FALSE}
 model_summary <- summary(model_county_size)
@@ -517,35 +474,15 @@ print(model_summary$coefficients) # Extracts only the coefficients
 cat("\nThis is the R-squared value:", model_summary$r.squared, "\n")
 ```
 
-The coefficient for Size is 22.704 (p\<0.001), meaning that in County 1
-(the reference level), each unit increase in Size leads to an expected
-22.7-unit increase in Crops. This effect is statistically significant,
-confirming a strong positive influence. County 2 has a negative
-coefficient of -4214.050 (p\<0.01), meaning crop yields there are 4214
-units lower than in County 1 for the same Size. County 3’s coefficient
-(-1284.813, p=0.334) is not statistically significant, so we cannot
-conclude a strong difference from County 1. Related has a coefficient of
--239.099 (p=0.499), indicating no significant impact on Crops. The
-Size:County2 interaction is 26.590 (p=0.003), meaning that the effect of
-Size on Crops in County 2 is stronger than in County 1, with a total
-increase of 49.3 units per Size unit. The Size:County3 interaction
-(8.916, p=0.176) is not statistically significant, so we cannot
-confidently conclude a difference from County 1. The model explains
-86.6% of the variation in Crops (R²=0.866), indicating strong
-explanatory power. 
+The coefficient for Size is 22.704 (p\<0.001), meaning that in County 1 (the reference level), each unit increase in Size leads to an expected 22.7-unit increase in Crops. This effect is statistically significant, confirming a strong positive influence. County 2 has a negative coefficient of -4214.050 (p\<0.01), meaning crop yields there are 4214 units lower than in County 1 for the same Size. County 3’s coefficient (-1284.813, p=0.334) is not statistically significant, so we cannot conclude a strong difference from County 1. Related has a coefficient of -239.099 (p=0.499), indicating no significant impact on Crops. The Size:County2 interaction is 26.590 (p=0.003), meaning that the effect of Size on Crops in County 2 is stronger than in County 1, with a total increase of 49.3 units per Size unit. The Size:County3 interaction (8.916, p=0.176) is not statistically significant, so we cannot confidently conclude a difference from County 1. The model explains 86.6% of the variation in Crops (R²=0.866), indicating strong explanatory power. 
 
 ```{r, echo=FALSE}
 confint(model_county_size)
 ```
 
-The above confidence intervals confirm that Size has a strong,
-statistically significant positive effect, and that County 2 and the
-Size:County2 interaction also have significant effects. In contrast, the
-confidence intervals for County 3, Related, and Size:County3 include
-zero, meaning there is no strong evidence that these factors
-significantly influence Crops.
+The above confidence intervals confirm that Size has a strong, statistically significant positive effect, and that County 2 and the Size:County2 interaction also have significant effects. In contrast, the confidence intervals for County 3, Related, and Size:County3 include zero, meaning there is no strong evidence that these factors significantly influence Crops.
 
-### Section d
+#### Section d
 
 ```{r, echo=FALSE}
 pred <- emmeans::emmeans(model_county_size, specs = ~ County * Related * Size, 
@@ -566,21 +503,9 @@ cat("Residual Variance (sigma^2):", sigma(model_county_size)^2, "\n")
 cat("Total Variance:",pred_var + sigma(model_county_size)^2)
 ```
 
-The fact that the prediction variance is much smaller than the residual
-variance suggests that most of the uncertainty is due to the residual
-variation (random noise or factors not captured by the model), rather
-than the instability of the model’s coefficient estimates.
+The fact that the prediction variance is much smaller than the residual variance suggests that most of the uncertainty is due to the residual variation (random noise or factors not captured by the model), rather than the instability of the model’s coefficient estimates.
 
-# Exercise 3
-
-Here, we will explore the effect of different additives on the yield of
-peas with a primary focus on nitrogen (*N*). Other additives are
-potassium (*K*) and phosphorus (*P*). The data is obtained through the
-MASS package library (npk) and represents 6 blocks of soil, each
-containing 4 plots. Each *block* contains exactly two of each additive
-and no plot can have two of the same additive.
-
-We start by loading the neccesary npk dataset from the MASS package.
+# Exercise 3: Yield of peas
 
 ```{r include=FALSE}
 library(MASS)
@@ -589,11 +514,9 @@ library(dplyr)
 data(npk)
 ```
 
-### Section a
+#### Section a
 
-To optimize possible future instances of a random plot distribution
-process we create a data frame similar to that of the npk data such that
-it may be utilized similarly.
+To optimize possible future instances of a random plot distribution process we create a data frame similar to that of the npk data such that it may be utilized similarly.
 
 ```{r}
 # Set block and plot dimensions
@@ -617,10 +540,9 @@ for (block in 1:n_blocks) {
 }
 ```
 
-### Section b
+#### Section b
 
-From the npk data a bar graph is generated to report the average *yield*
-per *block* in the presence (1) and absence (0) of *N*.
+From the npk data a bar graph is generated to report the average *yield* per *block* in the presence (1) and absence (0) of *N*.
 
 ```{r, echo=FALSE, fig.width = 4, fig.height = 2}
 # Group npk data by block and N
@@ -640,17 +562,11 @@ avg_yield_plot
 
 ```
 
-From the graph we can note that there seems to be a correlation between
-a higher *yield* and the presence of the additive *N* in the plot soil.
-We will further investigate this hypothesis with different tests such as
-a full two-way ANOVA. The *block* factor is not of interest but is
-applied to group plot tests and may introduce variability within the
-samples.
+From the graph we can note that there seems to be a correlation between a higher *yield* and the presence of the additive *N* in the plot soil. We will further investigate this hypothesis with different tests such as a full two-way ANOVA. The *block* factor is not of interest but is applied to group plot tests and may introduce variability within the samples.
 
-### Section c
+#### Section c
 
-A full two-way ANOVA is conducted with the response variable *yield* and
-the two factors *block* and *N*. We start with a main effects model.
+A full two-way ANOVA is conducted with the response variable *yield* and the two factors *block* and *N*. We start with a main effects model.
 
 ```{r, echo=FALSE}
 two_way_anova_main <- aov(yield ~ block + N, data = npk)
@@ -664,20 +580,9 @@ two_way_anova_int <- aov(yield ~ block * N, data = npk)
 summary(two_way_anova_int)
 ```
 
-With a p-value of 0.0071 and 0.0262 respectively in the main effects
-model, the ANOVA signifies that both the *N* additive and *block* factor
-have statistically significant effects on the yield of peas with
-nitrogen having a larger effect compared to the block. However, we might
-say that the *block* factor merely introduces variability in the samples
-and do not represent fixed system effects. Including the *block* factor
-is, however, important to understand the amount of variability it may
-cause. In the interaction model both factors again have a p-value below
-0.05. Additionally, we notice that there is no statistically significant
-effect on the *yield* from an interaction between *N* and *yield*.
+With a p-value of 0.0071 and 0.0262 respectively in the main effects model, the ANOVA signifies that both the *N* additive and *block* factor have statistically significant effects on the yield of peas with nitrogen having a larger effect compared to the block. However, we might say that the *block* factor merely introduces variability in the samples and do not represent fixed system effects. Including the *block* factor is, however, important to understand the amount of variability it may cause. In the interaction model both factors again have a p-value below 0.05. Additionally, we notice that there is no statistically significant effect on the *yield* from an interaction between *N* and *yield*.
 
-To solidify our findings we perform an analysis on the residuals of the
-main effects model with a normality test and a plot of the distribution
-with a histogram.
+To solidify our findings we perform an analysis on the residuals of the main effects model with a normality test and a plot of the distribution with a histogram.
 
 ```{r, echo=FALSE, fig.width = 6, fig.height = 3}
 par(mfrow=c(1,2))
@@ -690,28 +595,20 @@ hist(residuals(two_way_anova_main), main = "Histogram of Residuals", xlab = "Res
 
 ```
 
-We note that there is a slight deviation at the tail of the normality
-test which we investigate this further with a Shapiro Wilk test.
+We note that there is a slight deviation at the tail of the normality test which we investigate this further with a Shapiro Wilk test.
 
 ```{r, echo=FALSE}
 # Shapiro Wilk test (Since slight deviation at tail)
 shapiro.test(residuals(two_way_anova_main))
 ```
 
-From the Shapiro-Wilk test we receive a p-value greater than 0.05,
-combined with the Q-Q and histogram it is likely normally distributed.
+From the Shapiro-Wilk test we receive a p-value greater than 0.05, combined with the Q-Q and histogram it is likely normally distributed.
 
-Tests indicate a normal distribution of the residuals and the data is
-continuous. We can therefore say that a non-parametric designed test
-such as a Friedman test is not applicable. Additionally, We have limited
-in-block variation due to a randomized block design with continuous data
-which is more applicable to the ANOVA model design.
+Tests indicate a normal distribution of the residuals and the data is continuous. We can therefore say that a non-parametric designed test such as a Friedman test is not applicable. Additionally, We have limited in-block variation due to a randomized block design with continuous data which is more applicable to the ANOVA model design.
 
-### Section d
+#### Section d
 
-To investigate the effects of other variables and any other possible
-interactions we explore more models. We first test for the presence of
-additional main effects from all additives and the block factor.
+To investigate the effects of other variables and any other possible interactions we explore more models. We first test for the presence of additional main effects from all additives and the block factor.
 
 ```{r, echo=FALSE}
 # Main effect model of all factors
@@ -719,13 +616,9 @@ model_1 <- aov(yield ~ N + P + K + block, data = npk)
 summary(model_1)
 ```
 
-We now learn that potassium has a statistically significant effect on
-the yield with a p-value of 0.02767. From this main effects model we
-therefore learn that only *P* does not contribute significantly, we will
-therefore omit *P* in subsequent models.
+We now learn that potassium has a statistically significant effect on the yield with a p-value of 0.02767. From this main effects model we therefore learn that only *P* does not contribute significantly, we will therefore omit *P* in subsequent models.
 
-Next, we explore the interaction between potassium and the other
-remaining main effect variables *N* and *block*.
+Next, we explore the interaction between potassium and the other remaining main effect variables *N* and *block*.
 
 ```{r, echo=FALSE}
 # Interaction model between N, K and block
@@ -733,8 +626,7 @@ model_2 <- aov(yield ~ N * K + K * block, data = npk)
 summary(model_2)
 ```
 
-From the data we learn that there is no significant interaction between
-the different factors. We further explore this with an interaction plot.
+From the data we learn that there is no significant interaction between the different factors. We further explore this with an interaction plot.
 
 ```{r, echo=FALSE, fig.width = 6, fig.height = 3}
 par(mfrow=c(1,2))
@@ -749,13 +641,9 @@ interaction.plot(npk$block, npk$N, npk$yield,
                  trace.label = "Yield")
 ```
 
-From this plot we only observe a minor possible interaction between
-*block* and *N*. However, due to the overall linearity we suspect the
-interaction to be mostly negligible.
+From this plot we only observe a minor possible interaction between *block* and *N*. However, due to the overall linearity we suspect the interaction to be mostly negligible.
 
-We will therefore approach a main effects model where we leave out
-phosphor to omit arbitrary data and prevent overfitting. The main effect
-model will include factors *N*, *K* and *block*
+We will therefore approach a main effects model where we leave out phosphor to omit arbitrary data and prevent overfitting. The main effect model will include factors *N*, *K* and *block*
 
 ```{r}
 # NOTE: P could be omitted due to statistical insignificance
@@ -763,10 +651,9 @@ model_3 <- aov(yield ~ N + K + block, data = npk)
 summary(model_3)
 ```
 
-### Section e
+#### Section e
 
-To investigate the influence of the factors on the *yield*, we will
-perform a Tukey's Honest Significant Difference (HSD) test.
+To investigate the influence of the factors on the *yield*, we will perform a Tukey's Honest Significant Difference (HSD) test.
 
 ```{r}
 # Apply TukeyHSD 
@@ -774,18 +661,11 @@ tukey_results <- TukeyHSD(model_3)
 tukey_results
 ```
 
-From the TukeyHSD results we see that K has a significant negative
-impact on yield. Therefore we can say that the best combination for
-model 3 (where we do not consider *P*) is *N* = 1 and *K* = 0.
-Additionally, the *block* factor introduces variability with *block* 3
-having the overall biggest positive impact and *block* 1 a relatively
-lower *yield*.
+From the TukeyHSD results we see that K has a significant negative impact on yield. Therefore we can say that the best combination for model 3 (where we do not consider *P*) is *N* = 1 and *K* = 0. Additionally, the *block* factor introduces variability with *block* 3 having the overall biggest positive impact and *block* 1 a relatively lower *yield*.
 
-### Section f
+#### Section f
 
-Finally, we create a mixed effects analysis for our chosen main effect
-model with factors *N*, *K* and *block* where we model *block* as a
-random effect.
+Finally, we create a mixed effects analysis for our chosen main effect model with factors *N*, *K* and *block* where we model *block* as a random effect.
 
 ```{r, echo=FALSE}
 # Create a Mixed effects model with all chosen factors.
@@ -793,13 +673,5 @@ mixed_effects_model <- lme4::lmer(yield ~ N + K + (1 | block), data = npk)
 summary(mixed_effects_model)
 ```
 
-Similarly to the additive model, we can conclude that *N* has a
-significant (5.617) positive effect on the *yield* with a p-value of
-0.00302, whereas *K* has a statistically significant negative effect on
-the *yield* (-3.983) with a p-value of 0.02487. This analysis shows that
-*blocks* have significant variability in data, with a random effects
-variance of 13.16. This mixed effects model further solidifies the
-stance that *N* has a significant impact on *yield*. We further note
-that the mixed effects model may provide a better representation, since
-*blocks* introduce random variance and not fixed systemic effects such
-as *N*, *P* and *K*.
+Similarly to the additive model, we can conclude that *N* has a significant (5.617) positive effect on the *yield* with a p-value of 0.00302, whereas *K* has a statistically significant negative effect on the *yield* (-3.983) with a p-value of 0.02487. This analysis shows that *blocks* have significant variability in data, with a random effects variance of 13.16. This mixed effects model further solidifies the stance that *N* has a significant impact on *yield*. We further note that the mixed effects model may provide a better representation, since *blocks* introduce random variance and not fixed systemic effects such as *N*, *P* and *K*.
+:::
