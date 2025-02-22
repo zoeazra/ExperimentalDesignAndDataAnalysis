@@ -7,16 +7,10 @@ output:
     latex_engine: xelatex
 fontsize: 11pt
 highlight: tango
-editor_options: 
-  markdown: 
-    wrap: 72
 ---
 
-```{r}
-install.packages("tinytex", repos = "https://cran.r-project.org")
-```
-
-## Exercise 1
+::: {style="text-align: justify;"}
+# Exercise 1: Cholesterol
 
 First we load and read the necessary data set
 
@@ -24,16 +18,11 @@ First we load and read the necessary data set
 data = read.delim("cholesterol.txt", sep=' ')
 ```
 
-#### a) Make some relevant plots of this data set, comment on normality. Investigate whether the columns *Before* and *After8weeks* are correlated.
+#### Section a
 
-In order to investigate the normality of the data set, Q-Q plots are
-created below for both the *Before* and *After8weeks* columns. As in
-both plots the data points closely follow the diagonal red line, the
-data is approximating a normal distribution. While some minor deviations
-may be present in the tails, the overall pattern suggests that the
-normality assumption is reasonable.
+In order to investigate the normality of the data set, Q-Q plots are created below for both the *Before* and *After8weeks* columns. As in both plots the data points closely follow the diagonal red line, the data is approximating a normal distribution. While some minor deviations may be present in the tails, the overall pattern suggests that the normality assumption is reasonable.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.width=6, fig.height=3}
 par(mfrow = c(1,2)) 
 
 qqnorm(data$Before, main = "Q-Q Plot for Before")
@@ -44,12 +33,9 @@ qqline(data$After8weeks, col = "red")
 
 ```
 
-To further explore the normality assumption, histograms below were
-plotted for both 'Before' and 'After8weeks'. The histograms exhibit a
-roughly bell-shaped distribution, which supports the assumption of
-normality.
+To further explore the normality assumption, histograms below are plotted for both *Before* and *After8weeks*. The histograms exhibit a roughly bell-shaped distribution, which supports the assumption of normality.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.width=6, fig.height=3}
 par(mfrow = c(1,2))  
 
 hist(data$Before, probability = TRUE, 
@@ -65,36 +51,27 @@ hist(data$After8weeks, probability = TRUE,
 lines(density(data$After8weeks), col = "red", lwd = 2)
 ```
 
-However, to address normality more formally, a Shapiro-Wilk test is
-conducted, as this test is suitable to test on normallity for small data
-sets. For the test the null hypothesis is as follows:
+However, to address normality more formally, a Shapiro-Wilk test is conducted, as this test is suitable to test for normality for small data sets. The null hypothesis is as follows:
 
 H0: The data is normally distributed.
 
-The W-statistic measures how closely the data aligns with a normal
-distribution, ranging from 0 to 1, where values closer to 1 indicate a
-stronger likelihood of normality. Considering the results for *Before*
-and *After8weeks*, both W-values are close to 1. Additionally, with a
-95% confidence level, both p-values exceed 0.05, meaning that we fail to
-reject H0. These findings provide strong evidence that the data in both
-columns can be considered to be normally distributed.
+The W-statistic measures how closely the data aligns with a normal distribution, ranging from 0 to 1, where values closer to 1 indicate a stronger likelihood of normality. Considering the results for *Before* and *After8weeks*, both W-values are close to 1. Additionally, with a 95% confidence level, both p-values exceed 0.05, meaning that we fail to reject H0. These findings provide strong evidence that the data in both columns can be considered to be normally distributed.
 
 ```{r}
-shapiro.test(data$Before)
-shapiro.test(data$After8weeks)
+shapiro_before = shapiro.test(data$Before)
+shapiro_after = shapiro.test(data$After8weeks)
 ```
 
-In order to investigate the relationship between the columns of *Before*
-and *After8weeks* a scatter plot is created below. The scatter plot
-demonstrates a strong positive correlation between 'Before' and
-'After8weeks' cholesterol levels. The data points align closely with the
-red regression line, suggesting that individuals with higher cholesterol
-levels before the diet intervention also tend to have higher cholesterol
-levels after 8 weeks. This indicates that while cholesterol levels may
-have decreased, there remains a strong relationship between pre- and
-post-diet measurements.
+```{r, echo=FALSE,results='asis'}
+cat("**Shapiro-Wilk Test for Before: **",
+    "W-statistic =", round(shapiro_before$statistic, 3), ", p-value =", round(shapiro_before$p.value, 3), "\n\n")
+cat("**Shapiro-Wilk Test for After 8 Weeks: **",
+    "W-statistic =", round(shapiro_after$statistic, 3), ", p-value =", round(shapiro_after$p.value, 3), "\n")
+```
 
-```{r, echo=FALSE}
+In order to investigate the relationship between the columns of *Before* and *After8weeks* a scatter plot is created below. The scatter plot demonstrates a strong positive correlation between 'Before' and 'After8weeks' cholesterol levels. The data points align closely with the red regression line, suggesting that individuals with higher cholesterol levels before the diet intervention also tend to have higher cholesterol levels after 8 weeks. This indicates that while cholesterol levels may have decreased, there remains a strong relationship between pre- and post-diet measurements.
+
+```{r, echo=FALSE, fig.width=5, fig.height=3}
 plot(data$Before, data$After8weeks, 
      main = 'Regression for Before and After8weeks', 
      xlab='Before', 
@@ -102,122 +79,93 @@ plot(data$Before, data$After8weeks,
 abline(lm(After8weeks ~ Before, data = data), col = "red")
 ```
 
-To quantify this correlation, the Pearson’s correlation coefficient is
-calculated below. A high Pearson correlation (close to 1) indicates a
-strong positive relationship between the two columns. The correlation
-coefficient exhibits a value of approximately 0.99, confirming the
-strong positive relationship. Additionally, the p-value is smaller than
-0.05, indicating that the correlation is statistically significant.
+To quantify this correlation, the Pearson’s correlation coefficient is calculated below. A high Pearson correlation (close to 1) indicates a strong positive relationship between the two columns. The correlation coefficient exhibits a value of approximately 0.99, confirming the strong positive relationship. Additionally, the p-value is smaller than 0.05, indicating that the correlation is statistically significant.
 
 ```{r}
-cor.test(data$Before, data$After8weeks, method = "pearson")
+cor_result = cor.test(data$Before, data$After8weeks, method = "pearson")
 ```
 
-#### b) Apply a couple of relevant tests (at least two tests, see Lectures 2–3) to verify whether the diet with low fat margarine has an eﬀect (argue whether the data are paired or not). Is a permutation test applicable? Is the Mann-Whitney test applicable?
+```{r, echo=FALSE, results='asis'}
+rounded_cor = round(cor_result$estimate, 3)  
+rounded_p = formatC(cor_result$p.value, format = "e", digits = 3)  
+rounded_conf_int = round(cor_result$conf.int, 3)  
 
-As the cholesterol data was measured on the same population at different
-times, we consider the data to be paired. In this case it is possible to
-conduct a T-test for paired samples. However, in order to This test
-assumes that the mean difference of the two populations is normally
-distributed, thus, a Shapiro-Wilk test is conducted first to investigate
-the distribution.
+# Print formatted results
+cat("**Pearson Correlation Test: **", "\n\n")
+cat("Correlation coefficient (r) = ", rounded_cor, ", p-value =", rounded_p, ", 95% CI: [", rounded_conf_int[1], ",", rounded_conf_int[2], "]")
+```
+
+#### Section b
+
+Since the cholesterol levels were measured on the same individuals at different times, the data is paired, making a paired t-test appropriate. However, since the t-test assumes normality of the mean difference, we first assess this assumption by applying a Shapiro-Wilk test. H0: The data is normally distributed.
+
+The W-statistic (0.99) is close to 1, and the p-value exceeds 0.05, meaning we fail to reject H0, providing strong evidence that the mean difference follows a normal distribution.
 
 ```{r}
 difference = data$Before - data$After8weeks
-shapiro.test(difference)
+shapiro_result = shapiro.test(difference)
 ```
 
-Explain that the data is paired:
+```{r, echo=FALSE,results='asis'}
+rounded_W = round(shapiro_result$statistic, 3) 
+rounded_p = round(shapiro_result$p.value, 3)
 
-We are doing a T-test
-
-The null hypothesis is as follows:
-
-H0: The margarine diet has no effect, i.e. the mean cholesterol levels
-*Before* and *After8weeks* are the same.
-
-```{r}
-# H0: The margarine diet has no effect, i.e. the mean cholesterol levels Before and After 8 weeks are the same
-# H1: The margarine diet reduces cholesterol levels --> mean_before > mean_after
-# Paired t-test
-# Assumption: the differences between Before and After should be normally distributed
-# Outcome: if p < 0.05, reject H0
-t.test(data$Before, data$After8weeks, paired = TRUE, alternative = "greater")
-
-# Visualizing distribution of the differences
-difference = data$Before - data$After8weeks
-
-shapiro.test(difference)
-
-hist(difference, probability = TRUE,
-     main = 'Data distribution of differences between Before and After8weeks',
-     col = 'lightblue',
-     xlab = 'Difference (Before - After8weeks)',
-     ylab = 'Proportion')
-lines(density(difference), col = 'red', lwd = 2)
-
-qqnorm(difference,
-       main = 'QQ-plot for differences',
-       xlab = 'Theoretical Quantiles',
-       ylab = 'Sample Quantiles')
-qqline(difference, col = "red")
+# Print formatted results
+cat("**Shapiro-Wilk Test for Mean Difference:** W-statistic =", rounded_W, ",", "p-value =", rounded_p)
 ```
 
+The paired t-test shows strong evidence against the null hypothesis (t = 14.946, p = 1.639e-11), indicating a significant cholesterol reduction after 8 weeks on the margarine diet. The mean difference of 0.629 mmol/L supports this, with a 95% confidence interval [0.556, Inf] confirming that the reduction is at least 0.556 mmol/L. These results suggest a clear effect of the diet on lowering cholesterol levels.
+
 ```{r}
+t_test_result = t.test(data$Before, data$After8weeks, paired = TRUE, alternative = "greater")
+```
 
+```{r, echo=FALSE,results='asis'}
+rounded_t = round(t_test_result$statistic, 3)
+rounded_p = formatC(t_test_result$p.value, format = "e", digits = 3) 
+rounded_conf_int = round(t_test_result$conf.int, 3)
 
-# Doing permutation test:
-# H0: there is no difference between the Before and After8weeks groups
+# Print formatted results
+cat("**Paired T-Test Results:** \n\n T-statistic =", rounded_t, ", p-value =", rounded_p, ", 95% Confidence Interval: [", rounded_conf_int[1], ",", rounded_conf_int[2], "]")
+
+```
+
+The permutation test (p = 1.0e-05) provides strong evidence to reject the null hypothesis, confirming a significant cholesterol reduction of 0.629 mmol/L after 8 weeks. This supports the effectiveness of the margarine diet. A Mann-Whitney U-test is not applicable as it requires independent samples, while this data is paired.
+
+```{r}
 diff = data$Before - data$After8weeks
-n_permutations = 1000
+n_permutations = 100000
 observed_mean = mean(diff)
 
 permute_test = function(diff) {
-  permuted_diff <- diff * sample(c(-1, 1), length(diff), replace = TRUE)  # Randomly flip signs
+  permuted_diff <- diff * sample(c(-1, 1), length(diff), replace = TRUE)
   return(mean(permuted_diff)) 
 }
 
 set.seed(42)
 permute_distr = replicate(n_permutations, permute_test(diff))
-
-# Histogram of the permutation distribution
-hist(permute_distr, probability = TRUE, col = "gray", 
-     main = "Permutation Test Distribution", xlab = "Mean Differences",
-     xlim = range(c(permute_distr, observed_mean)))  # Adjust x-axis limits
-
-# Add a red line at observed mean difference
-abline(v = observed_mean, col = "red", lwd = 2, lty = 2)
-
-# Print observed mean to check if it is within range
-cat("Observed mean difference:", observed_mean, "\n")
-
-# Compute p-value
-p_value = mean(abs(permute_distr) >= abs(observed_mean))
-cat("Permutation test p-value:", p_value, "\n")
-
-# Doing a Mann-Whitney U-test, as we are testing ordinal data
-# H0: There is no difference in mean cholesterol level in the Before and After groups
-wilcox.test(data$Before, data$After8weeks, paired = TRUE, alternative = "two.sided")
-# H1: cholesterol levels are lower after 8 weeks
-wilcox.test(data$Before, data$After8weeks, paired = TRUE, alternative = "greater")
+rounded_observed_mean = round(observed_mean, 3) 
+rounded_p_value = formatC(mean(abs(permute_distr) >= abs(observed_mean)), format = "e", digits = 3)
 ```
 
-#### c) Let *X1,...,X18* be the column *After8weeks*. Assume *X1,...,X18 \~ N(mu, sigma\^2) (*irrespective of your conclusion in a)) with unknown μ and σ\^2. Construct a 97%-CI for μ based on normality. Next, construct a bootstrap 97%-CI for μ and compare it to the above CI.
+```{r, echo=FALSE, results='asis'}
+cat("**Observed mean difference:**", rounded_observed_mean, "\n")
+cat("**Permutation test p-value:**", rounded_p_value)
+```
+
+#### Section c
+
+To estimate the mean cholesterol level after 8 weeks, we compute a 97% confidence interval using both the t-test and bootstrapping. The t-test CI, assuming normality, is [5.164, 6.394], while the bootstrap CI, based on resampling, is [5.230, 6.320]. The substantial overlap suggests that both methods provide similar estimates. The slight differences arise because the t-test relies on the sample standard deviation, whereas bootstrapping does not assume normality. Since both approaches yield consistent results, we can confidently conclude that cholesterol levels remain moderate after 8 weeks on the diet.
 
 ```{r}
-# calculating 97% CI for mu using t-score
 n = length(data$After8weeks)
 sample_mean = mean(data$After8weeks)
 sample_sd = sd(data$After8weeks)
 critical_value = qt(1-0.015, df=17)
 standard_error = sample_sd / sqrt(n)
-
 left_bound = sample_mean - critical_value * standard_error
 right_bound = sample_mean + critical_value * standard_error
 
-cat("97% Confidence Interval for mu: [", left_bound, ",", right_bound, "]\n")
-
-# calculating 97% CI for mu with bootstrapping
 bootstrap_ci = function(x, conf_level = 0.97, B = 10000) {
   alpha = 1 - conf_level
   Bstats = lapply(1:B, FUN = function(i) {
@@ -225,30 +173,136 @@ bootstrap_ci = function(x, conf_level = 0.97, B = 10000) {
     mean(boot_sample)
   } )
   Bstats = unlist(Bstats)
-  quantile(Bstats, prob = c(alpha/2, 1-alpha/2))
+  ci = round(quantile(Bstats, prob = c(alpha/2, 1-alpha/2)), 3)
+  return(ci)
 }
-
-set.seed(42)
-bootstrap_ci(data$After8weeks)
 ```
 
-#### d) Using a bootstrap test with test statistic T=max(X1,…,X18), determine those θ∈[3,12] (if there are any) for which  H0:X1,…,X18∼Unif[3,θ] is not rejected. Can the Kolmogorov-Smirnov test be also applied for this question? If yes, apply it; if not, explain why not.
+```{r, echo=FALSE, results='asis'}
+# Round values to 3 decimals
+rounded_mean = round(sample_mean, 3)
+rounded_sd = round(sample_sd, 3)
+rounded_critical_value = round(critical_value, 3)
+rounded_left_bound = round(left_bound, 3)
+rounded_right_bound = round(right_bound, 3)
 
-#### e) Using an appropriate test, verify whether the median cholesterol level after 8 weeks of low fat diet is less than 6. Next, design and perform a test to check whether the fraction of the cholesterol levels after 8 weeks of low fat diet less than 4.5 is at most 25%.
+# Print formatted results
+cat("**Results:**\n\n")
+cat("Sample mean:", rounded_mean)
+cat(", Sample standard deviation:", rounded_sd)
+cat(", Critical value:", rounded_critical_value)
+cat(", 97% CI for mu: [", rounded_left_bound, ",", rounded_right_bound, "]\n\n")
+set.seed(42)
+bootstrap_ci_result <- bootstrap_ci(data$After8weeks)
+cat("Bootstrap test with 97% CI: [", bootstrap_ci_result[1], ",", bootstrap_ci_result[2], "]\n")
+
+```
+
+#### Section d
+
+For the bootstrap test, we consider the following null hypothesis:
+
+H0: The data follows a uniform distribution with a minimum of 3 and a maximum of theta.
 
 ```{r}
-median(data$After8weeks)
-wilcox.test(data$After8weeks, mu = 6, alternative = "less")
+set.seed(42)  # Ensure reproducibility
+T_max_observed = max(data$After8weeks)
+n = length(data$After8weeks)
+theta_values = 3:12
+p_values = numeric(length(theta_values))
+Bootstraps = 100000 
+for (i in seq_along(theta_values)) {
+  theta = theta_values[i]
+  t_star = numeric(Bootstraps)
+  for (j in 1:Bootstraps) {
+    x_star = runif(n, min = 3, max = theta)
+    t_star[j] = max(x_star)
+  }
+  pl = sum(t_star < T_max_observed) / Bootstraps  
+  pr = sum(t_star > T_max_observed) / Bootstraps  
+  p_values[i] = 2 * min(pl, pr)
+}
+```
 
-# Count how many values in After8weeks are less than 4.5
+```{r, echo=FALSE, results='asis'}
+results_table = data.frame(
+  Theta = theta_values,
+  P_Value = round(p_values, 3)
+)
+# Transpose the table properly
+library(tibble)
+horizontal_table <- as.data.frame(t(results_table[,-1]))  # Exclude Theta column for transposing
+colnames(horizontal_table) = results_table$Theta  # Use Theta values as column names
+rownames(horizontal_table) = "P-Value"  # Set row name
+library(knitr)
+cat("**Results: Table 1** Theta values and their p-values")
+kable(horizontal_table)
+
+```
+
+To generate bootstrap samples from a Uniform(3, theta) distribution, we iterate over theta values from 3 to 12 in steps of 1, generating 100,000 bootstrap samples for each. The maximum value from each re-sample is recorded, and the p-value is computed by comparing the observed maximum(*T_max_observed*) with the bootstrap distribution (*t_star*).
+
+```{r}
+accepted_theta <- c(8, 9, 10, 11)
+ks_results <- list()
+
+for (theta in accepted_theta) {
+  ks_test_result <- ks.test(data$After8weeks, "punif", min = 3, max = theta)
+  ks_results[[as.character(theta)]] <- list(
+    theta = theta,
+    D_statistic = round(ks_test_result$statistic, 3),
+    p_value = formatC(ks_test_result$p.value, format = "e", digits = 3)
+  )
+}
+```
+
+```{r, echo=FALSE, results='asis'}
+for (res in ks_results) {
+  cat("**Kolmogorov-Smirnov Test for Uniform(3,", res$theta, "):**\n")
+  cat("D-statistic:", res$D_statistic, ", P-value:", res$p_value, "\n")
+}
+```
+
+For theta = 9, theta = 10, and theta = 11 we get a p-value \< 0.05, thus we reject H0 indicating that the observed maximum for these values is significantly different from the expected maximum under U(3,theta). For theta = 8, we fail to reject H0, meaning that the data could be from a uniform distribution.
+
+#### Section e
+
+To test whether the median of the cholesterol level is less than 6, we will use a Wilcoxon signed-rank test, because it is a non-parametric test that does not assume normality, making it suitable for small sample sizes and skewed data. The null hypothesis is:
+
+H0: The median cholesterol level is 6 or greater.
+
+The test yields a p-value of 0.223, meaning we fail to reject H0​. This suggests that the median cholesterol level after 8 weeks is not significantly less than 6 at the 5% significance level.
+
+```{r, results='asis'}
+wilcox_result = wilcox.test(data$After8weeks, mu = 6, alternative = "less", exact = FALSE)
+```
+
+```{r, echo=FALSE, results='asis'}
+rounded_V = round(wilcox_result$statistic, 3)
+rounded_p_value = formatC(wilcox_result$p.value, format = "e", digits = 3)
+cat("**Wilcoxon Signed-Rank Test:**", "V-statistic:", rounded_V, ", p-value:", rounded_p_value, "\n")
+
+```
+
+To determine whether the fraction of cholesterol levels below 4.5 after 8 weeks exceeds 25%, a binomial test is conducted. The null hypothesis is:
+
+H0: The fraction of cholesterol levels below 4.5 is at most 25%.
+
+The test yields a p-value of 0.865, meaning we fail to reject H0​ at the 5% significance level. This suggests that there is no significant evidence that the proportion of cholesterol levels below 4.5 is greater than 25%.
+
+```{r}
 count_below_4.5 = sum(data$After8weeks < 4.5)
-percentage_below_4.5 = (count_below_4.5 / length(data$After8weeks)) * 100
-cat("Percentage of cholesterol levels below 4.5:", percentage_below_4.5, "%\n")
+binom_result = binom.test(count_below_4.5, length(data$After8weeks), p = 0.25, alternative = "greater")
+```
 
-# H0: The fraction of cholesterol levels below 4.5 is at most 25%
-# H1: The fraction is greater than 25%
-# if the p-value is small (<0.05), we reject H0 and conclude that the fraction is significantly greater than 25%.
-binom.test(count_below_4.5, length(data$After8weeks), p = 0.25, alternative = "greater")
+```{r, echo=FALSE, results='asis'}
+rounded_p_value = round(binom_result$p.value, 3)
+rounded_conf_int = round(binom_result$conf.int, 3)
+rounded_prob_estimate = round(binom_result$estimate, 3)
+
+# Print formatted results
+cat("**Exact binomial test**\n\n")
+cat("Number of successes:", count_below_4.5, ", Number of trials:", length(data$After8weeks), ", p-value:", rounded_p_value, ", 95% CI: [", rounded_conf_int, "], Estimated probability of success:", rounded_prob_estimate, "\n")
 ```
 
 ## Exercise 2: Crops
@@ -297,9 +351,7 @@ cat("These are the coefficients:\n")
 print(model_summary$coefficients)
 ```
 
-The above model summary table aligns with the ANOVA p-values as both
-show that none of the predictors(County, Related, or their interaction)
-are significant in either table.
+The above model summary table aligns with the ANOVA p-values as both show that none of the predictors(County, Related, or their interaction) are significant in either table.
 
 ```{r, echo=FALSE, fig.width = 8, fig.height = 4}
 # Set up a 1-row, 2-column layout
@@ -502,8 +554,7 @@ pred <- emmeans::emmeans(model_county_size, specs = ~ County * Related * Size,
 summary(pred)
 ```
 
-The predicted yield crops for a farm from County 2 of size 165, with
-related landlord and tenant is 6141, with a 95% CI: (5428, 6855)
+The predicted yield crops for a farm from County 2 of size 165, with related landlord and tenant is 6141, with a 95% CI: (5428, 6855)
 
 ```{r, echo=FALSE}
 pred_se <- summary(pred)$SE
