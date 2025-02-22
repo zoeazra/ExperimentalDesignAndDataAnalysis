@@ -5,17 +5,10 @@ date: "23 February 2025"
 output: pdf_document
 fontsize: 11pt
 highlight: tango
-editor_options: 
-  markdown: 
-    wrap: 72
 ---
 
 ::: {style="text-align: justify;"}
-```{r}
-install.packages("tinytex", repos = "https://cran.r-project.org")
-```
-
-# Exercise 1
+# Exercise 1: Cholesterol
 
 First we load and read the necessary data set
 
@@ -25,14 +18,9 @@ data = read.delim("cholesterol.txt", sep=' ')
 
 #### Section a
 
-In order to investigate the normality of the data set, Q-Q plots are
-created below for both the *Before* and *After8weeks* columns. As in
-both plots the data points closely follow the diagonal red line, the
-data is approximating a normal distribution. While some minor deviations
-may be present in the tails, the overall pattern suggests that the
-normality assumption is reasonable.
+In order to investigate the normality of the data set, Q-Q plots are created below for both the *Before* and *After8weeks* columns. As in both plots the data points closely follow the diagonal red line, the data is approximating a normal distribution. While some minor deviations may be present in the tails, the overall pattern suggests that the normality assumption is reasonable.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.width=6, fig.height=3}
 par(mfrow = c(1,2)) 
 
 qqnorm(data$Before, main = "Q-Q Plot for Before")
@@ -41,16 +29,11 @@ qqline(data$Before, col = "red")
 qqnorm(data$After8weeks, main = "Q-Q Plot for After 8 Weeks")
 qqline(data$After8weeks, col = "red")
 
-options(repr.plot.width = 6, repr.plot.height = 3)
-
 ```
 
-To further explore the normality assumption, histograms below are
-plotted for both *Before* and *After8weeks*. The histograms exhibit a
-roughly bell-shaped distribution, which supports the assumption of
-normality.
+To further explore the normality assumption, histograms below are plotted for both *Before* and *After8weeks*. The histograms exhibit a roughly bell-shaped distribution, which supports the assumption of normality.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.width=6, fig.height=3}
 par(mfrow = c(1,2))  
 
 hist(data$Before, probability = TRUE, 
@@ -64,189 +47,88 @@ hist(data$After8weeks, probability = TRUE,
      xlab = 'Cholesterol level (mmol/L)',
      ylab = 'Probability')
 lines(density(data$After8weeks), col = "red", lwd = 2)
-
-options(repr.plot.width = 6, repr.plot.height = 3)
 ```
 
-However, to address normality more formally, a Shapiro-Wilk test is
-conducted, as this test is suitable to test for normality for small data
-sets. The null hypothesis is as follows:
+However, to address normality more formally, a Shapiro-Wilk test is conducted, as this test is suitable to test for normality for small data sets. The null hypothesis is as follows:
 
 H0: The data is normally distributed.
 
-The W-statistic measures how closely the data aligns with a normal
-distribution, ranging from 0 to 1, where values closer to 1 indicate a
-stronger likelihood of normality. Considering the results for *Before*
-and *After8weeks*, both W-values are close to 1. Additionally, with a
-95% confidence level, both p-values exceed 0.05, meaning that we fail to
-reject H0. These findings provide strong evidence that the data in both
-columns can be considered to be normally distributed.
+The W-statistic measures how closely the data aligns with a normal distribution, ranging from 0 to 1, where values closer to 1 indicate a stronger likelihood of normality. Considering the results for *Before* and *After8weeks*, both W-values are close to 1. Additionally, with a 95% confidence level, both p-values exceed 0.05, meaning that we fail to reject H0. These findings provide strong evidence that the data in both columns can be considered to be normally distributed.
 
 ```{r}
 shapiro_before = shapiro.test(data$Before)
 shapiro_after = shapiro.test(data$After8weeks)
 ```
 
-```{r, echo=FALSE}
-# Extract and round values
-rounded_W_before = round(shapiro_before$statistic, 3)
-rounded_p_before = round(shapiro_before$p.value, 3)
-
-rounded_W_after = round(shapiro_after$statistic, 3)
-rounded_p_after = round(shapiro_after$p.value, 3)
-
-# Print formatted results
-cat("Shapiro-Wilk Test for Before:\n")
-cat("W-statistic =", rounded_W_before, ", p-value =", rounded_p_before, "\n")
-cat("Shapiro-Wilk Test for After 8 Weeks:\n")
-cat("W-statistic =", rounded_W_before, ", p-value =", rounded_p_after, "\n")
+```{r, echo=FALSE,results='asis'}
+cat("**Shapiro-Wilk Test for Before: **",
+    "W-statistic =", round(shapiro_before$statistic, 3), ", p-value =", round(shapiro_before$p.value, 3), "\n\n")
+cat("**Shapiro-Wilk Test for After 8 Weeks: **",
+    "W-statistic =", round(shapiro_after$statistic, 3), ", p-value =", round(shapiro_after$p.value, 3), "\n")
 ```
 
-In order to investigate the relationship between the columns of *Before*
-and *After8weeks* a scatter plot is created below. The scatter plot
-demonstrates a strong positive correlation between 'Before' and
-'After8weeks' cholesterol levels. The data points align closely with the
-red regression line, suggesting that individuals with higher cholesterol
-levels before the diet intervention also tend to have higher cholesterol
-levels after 8 weeks. This indicates that while cholesterol levels may
-have decreased, there remains a strong relationship between pre- and
-post-diet measurements.
+In order to investigate the relationship between the columns of *Before* and *After8weeks* a scatter plot is created below. The scatter plot demonstrates a strong positive correlation between 'Before' and 'After8weeks' cholesterol levels. The data points align closely with the red regression line, suggesting that individuals with higher cholesterol levels before the diet intervention also tend to have higher cholesterol levels after 8 weeks. This indicates that while cholesterol levels may have decreased, there remains a strong relationship between pre- and post-diet measurements.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.width=5, fig.height=3}
 plot(data$Before, data$After8weeks, 
      main = 'Regression for Before and After8weeks', 
      xlab='Before', 
      ylab='After')
 abline(lm(After8weeks ~ Before, data = data), col = "red")
-options(repr.plot.width = 6, repr.plot.height = 3)
 ```
 
-To quantify this correlation, the Pearson’s correlation coefficient is
-calculated below. A high Pearson correlation (close to 1) indicates a
-strong positive relationship between the two columns. The correlation
-coefficient exhibits a value of approximately 0.99, confirming the
-strong positive relationship. Additionally, the p-value is smaller than
-0.05, indicating that the correlation is statistically significant.
+To quantify this correlation, the Pearson’s correlation coefficient is calculated below. A high Pearson correlation (close to 1) indicates a strong positive relationship between the two columns. The correlation coefficient exhibits a value of approximately 0.99, confirming the strong positive relationship. Additionally, the p-value is smaller than 0.05, indicating that the correlation is statistically significant.
 
 ```{r}
 cor_result = cor.test(data$Before, data$After8weeks, method = "pearson")
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, results='asis'}
 rounded_cor = round(cor_result$estimate, 3)  
 rounded_p = formatC(cor_result$p.value, format = "e", digits = 3)  
 rounded_conf_int = round(cor_result$conf.int, 3)  
 
 # Print formatted results
-cat("Pearson Correlation Test:\n")
-cat("Correlation coefficient (r) = ", rounded_cor, "p-value =", rounded_p, "\n")
-cat("95% Confidence Interval: [", rounded_conf_int[1], ",", rounded_conf_int[2], "]")
+cat("**Pearson Correlation Test: **", "\n\n")
+cat("Correlation coefficient (r) = ", rounded_cor, ", p-value =", rounded_p, ", 95% CI: [", rounded_conf_int[1], ",", rounded_conf_int[2], "]")
 ```
 
 #### Section b
 
-As the cholesterol data was measured on the same population at different
-times, we consider the data to be paired. In this case it is possible to
-conduct a T-test for paired samples. However, as the T-test assumes a
-normal distribution for the mean difference, we have to check whether
-this is the case first.
+Since the cholesterol levels were measured on the same individuals at different times, the data is paired, making a paired t-test appropriate. However, since the t-test assumes normality of the mean difference, we first assess this assumption by applying a Shapiro-Wilk test. H0: The data is normally distributed.
 
-The histogram suggests a roughly bell-shaped distribution, with the
-density curve closely following the bars, supporting the assumption of
-normality. The data are centered around 0.6–0.7, indicating an average
-decrease in cholesterol levels after 8 weeks. The Q-Q plot shows that
-the data points align well with the diagonal red line, further
-suggesting an approximate normal distribution, though slight deviations
-in the lower left tail may indicate mild skewness. However, given the
-small sample size (n = 18), such variability is expected and does not
-suggest a major departure from normality, making parametric tests like
-the paired t-test reasonable.
-
-```{r, echo=FALSE}
-difference = data$Before - data$After8weeks
-par(mfrow = c(1,2))
-hist(difference, freq = TRUE,
-     main = 'Data distribution of the \n mean difference',
-     col = 'lightblue',
-     xlab = 'Difference (Before - After8weeks)',
-     ylab = 'Frequency')
-lines(density(difference), col = 'red', lwd = 2)
-
-qqnorm(difference,
-       main = 'QQ-plot for mean difference',
-       xlab = 'Theoretical Quantiles',
-       ylab = 'Sample Quantiles')
-qqline(difference, col = "red")
-options(repr.plot.width = 6, repr.plot.height = 3)
-```
-
-To assess whether the mean difference is normally distributed for the
-t-test, a Shapiro-Wilk test is conducted:
-
-H0: The data is normally distributed.
-
-The W-statistic (≈ 0.99) is close to 1, and the p-value exceeds 0.05,
-meaning we fail to reject H0, providing strong evidence that the mean
-difference follows a normal distribution.
+The W-statistic (0.99) is close to 1, and the p-value exceeds 0.05, meaning we fail to reject H0, providing strong evidence that the mean difference follows a normal distribution.
 
 ```{r}
 difference = data$Before - data$After8weeks
 shapiro_result = shapiro.test(difference)
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE,results='asis'}
 rounded_W = round(shapiro_result$statistic, 3) 
 rounded_p = round(shapiro_result$p.value, 3)
 
 # Print formatted results
-cat("Shapiro-Wilk Test for Mean Difference:\n")
-cat("W-statistic =", rounded_W, ",", "p-value =", rounded_p)
+cat("**Shapiro-Wilk Test for Mean Difference:** W-statistic =", rounded_W, ",", "p-value =", rounded_p)
 ```
 
-Since we have strong evidence to assume that the data is normally
-distributed, we can proceed to conduct the T-test. For this, we consider
-the following null hypothesis:
-
-H0: The margarine diet has no effect, i.e. the mean cholesterol levels
-*Before* and *After8weeks* are the same.
-
-The paired t-test results show a t-statistic of 14.946 with 17 degrees
-of freedom and an extremely small p-value (1.639e-11), providing strong
-evidence to reject the null hypothesis. This supports the alternative
-hypothesis that the true mean difference is greater than 0, indicating
-that cholesterol levels were significantly lower after 8 weeks on the
-margarine diet. The mean difference of 0.629 mmol/L further reinforces
-this conclusion, showing an average reduction in cholesterol.
-Additionally, the 95% confidence interval [0.556, ∞] suggests that the
-true mean reduction is at least 0.556 mmol/L, with the infinite upper
-bound resulting from the one-sided test.
+The paired t-test shows strong evidence against the null hypothesis (t = 14.946, p = 1.639e-11), indicating a significant cholesterol reduction after 8 weeks on the margarine diet. The mean difference of 0.629 mmol/L supports this, with a 95% confidence interval [0.556, Inf] confirming that the reduction is at least 0.556 mmol/L. These results suggest a clear effect of the diet on lowering cholesterol levels.
 
 ```{r}
 t_test_result = t.test(data$Before, data$After8weeks, paired = TRUE, alternative = "greater")
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE,results='asis'}
 rounded_t = round(t_test_result$statistic, 3)
 rounded_p = formatC(t_test_result$p.value, format = "e", digits = 3) 
 rounded_conf_int = round(t_test_result$conf.int, 3)
 
 # Print formatted results
-cat("Paired T-Test Results:\n")
-cat("T-statistic =", rounded_t, ", p-value =", rounded_p, "\n")
-cat("95% Confidence Interval: [", rounded_conf_int[1], ",", rounded_conf_int[2], "]\n")
+cat("**Paired T-Test Results:** \n\n T-statistic =", rounded_t, ", p-value =", rounded_p, ", 95% Confidence Interval: [", rounded_conf_int[1], ",", rounded_conf_int[2], "]")
 
 ```
 
-The permutation test was conducted to assess whether there is a
-significant difference between cholesterol levels before and after 8
-weeks on the margarine diet. The observed mean difference is 0.629
-mmol/L, and the permutation test p-value is 1.0e-05, which is extremely
-small. This provides strong evidence to reject the null hypothesis,
-confirming that the margarine diet had a significant effect on reducing
-cholesterol levels.
-
-It is not possible to apply a Mann-Whitney U-test as the data is paired,
-and this test is only for independent samples.
+The permutation test (p = 1.0e-05) provides strong evidence to reject the null hypothesis, confirming a significant cholesterol reduction of 0.629 mmol/L after 8 weeks. This supports the effectiveness of the margarine diet. A Mann-Whitney U-test is not applicable as it requires independent samples, while this data is paired.
 
 ```{r}
 diff = data$Before - data$After8weeks
@@ -262,40 +144,26 @@ set.seed(42)
 permute_distr = replicate(n_permutations, permute_test(diff))
 rounded_observed_mean = round(observed_mean, 3) 
 rounded_p_value = formatC(mean(abs(permute_distr) >= abs(observed_mean)), format = "e", digits = 3)
-cat("Observed mean difference:", rounded_observed_mean, "\n")
-cat("Permutation test p-value:", rounded_p_value)
+```
+
+```{r, echo=FALSE, results='asis'}
+cat("**Observed mean difference:**", rounded_observed_mean, "\n")
+cat("**Permutation test p-value:**", rounded_p_value)
 ```
 
 #### Section c
 
-To construct a 97% confidence interval for the mean cholesterol level
-after 8 weeks, we first calculate the sample mean (5.77) and sample
-standard deviation (1.11). Using the t-distribution with 17 degrees of
-freedom, we obtain a 97% CI of [5.164, 6.394].
-
-Since bootstrapping does not assume normality, we also compute a
-bootstrap 97% CI, resampling the data 10,000 times and taking the 1.5%
-and 98.5% percentiles, resulting in [5.230, 6.320]. The substantial
-overlap between the t-test and bootstrap CIs suggests that both methods
-provide similar estimates for the mean. The slight differences arise
-because the t-test assumes normality, while bootstrapping relies purely
-on resampling. Since both methods lead to consistent results, this
-reinforces confidence that the true mean cholesterol level falls within
-this range. Overall, the findings suggest that cholesterol levels remain
-moderate after 8 weeks on the diet.
+To estimate the mean cholesterol level after 8 weeks, we compute a 97% confidence interval using both the t-test and bootstrapping. The t-test CI, assuming normality, is [5.164, 6.394], while the bootstrap CI, based on resampling, is [5.230, 6.320]. The substantial overlap suggests that both methods provide similar estimates. The slight differences arise because the t-test relies on the sample standard deviation, whereas bootstrapping does not assume normality. Since both approaches yield consistent results, we can confidently conclude that cholesterol levels remain moderate after 8 weeks on the diet.
 
 ```{r}
-# calculating 97% CI for mu using t-score
 n = length(data$After8weeks)
 sample_mean = mean(data$After8weeks)
 sample_sd = sd(data$After8weeks)
 critical_value = qt(1-0.015, df=17)
 standard_error = sample_sd / sqrt(n)
-
 left_bound = sample_mean - critical_value * standard_error
 right_bound = sample_mean + critical_value * standard_error
 
-# calculating 97% CI for mu with bootstrapping
 bootstrap_ci = function(x, conf_level = 0.97, B = 10000) {
   alpha = 1 - conf_level
   Bstats = lapply(1:B, FUN = function(i) {
@@ -304,12 +172,11 @@ bootstrap_ci = function(x, conf_level = 0.97, B = 10000) {
   } )
   Bstats = unlist(Bstats)
   ci = round(quantile(Bstats, prob = c(alpha/2, 1-alpha/2)), 3)
-  cat("Bootstrap test with", conf_level * 100, "% Confidence Interval:\n")
-  return (ci)
+  return(ci)
 }
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, results='asis'}
 # Round values to 3 decimals
 rounded_mean = round(sample_mean, 3)
 rounded_sd = round(sample_sd, 3)
@@ -317,125 +184,123 @@ rounded_critical_value = round(critical_value, 3)
 rounded_left_bound = round(left_bound, 3)
 rounded_right_bound = round(right_bound, 3)
 
-# Print results
-cat("The sample mean is:", rounded_mean, "\n")
-cat("The sample standard deviation is:", rounded_sd, "\n")
-cat("The critical value is:", rounded_critical_value, "\n")
-cat("97% Confidence Interval for mu: [", rounded_left_bound, ",", rounded_right_bound, "]\n")
-cat("\n")
+# Print formatted results
+cat("**Results:**\n\n")
+cat("Sample mean:", rounded_mean)
+cat(", Sample standard deviation:", rounded_sd)
+cat(", Critical value:", rounded_critical_value)
+cat(", 97% CI for mu: [", rounded_left_bound, ",", rounded_right_bound, "]\n\n")
 set.seed(42)
-bootstrap_ci(data$After8weeks)
+bootstrap_ci_result <- bootstrap_ci(data$After8weeks)
+cat("Bootstrap test with 97% CI: [", bootstrap_ci_result[1], ",", bootstrap_ci_result[2], "]\n")
+
 ```
 
 #### Section d
 
 For the bootstrap test, we consider the following null hypothesis:
 
-H0: The data follows a uniform distribution with a minimum of 3 and a
-maximum of θ.
-
-To generate bootstrap samples from a Uniform(3, θ) distribution, we
-iterate over θ values from 3 to 12 in steps of 1, generating 100,000
-bootstrap samples for each. The maximum value from each re-sample is
-recorded, and the p-value is computed by comparing the observed
-maximum(*T_max_observed*) with the bootstrap distribution (*t_star*).
+H0: The data follows a uniform distribution with a minimum of 3 and a maximum of theta.
 
 ```{r}
-set.seed(42) # ensure reproducability
-
+set.seed(42)  # Ensure reproducibility
 T_max_observed = max(data$After8weeks)
 n = length(data$After8weeks)
-
-for (theta in 3:12) {
-  Bootstraps = 100000  
-  t_star = numeric(Bootstraps)  
-  
-  for (i in 1:Bootstraps) {
-    x_star = runif(n, min = 3, max = theta) 
-    t_star[i] = max(x_star)
+theta_values = 3:12
+p_values = numeric(length(theta_values))
+Bootstraps = 100000 
+for (i in seq_along(theta_values)) {
+  theta = theta_values[i]
+  t_star = numeric(Bootstraps)
+  for (j in 1:Bootstraps) {
+    x_star = runif(n, min = 3, max = theta)
+    t_star[j] = max(x_star)
   }
-  
   pl = sum(t_star < T_max_observed) / Bootstraps  
   pr = sum(t_star > T_max_observed) / Bootstraps  
-  p = 2 * min(pl, pr)
-
-  print(paste("Theta =", theta, ", p-value =", round(p, 3)))
+  p_values[i] = 2 * min(pl, pr)
 }
+```
+
+```{r, echo=FALSE, results='asis'}
+results_table = data.frame(
+  Theta = theta_values,
+  P_Value = round(p_values, 3)
+)
+# Transpose the table properly
+library(tibble)
+horizontal_table <- as.data.frame(t(results_table[,-1]))  # Exclude Theta column for transposing
+colnames(horizontal_table) = results_table$Theta  # Use Theta values as column names
+rownames(horizontal_table) = "P-Value"  # Set row name
+library(knitr)
+cat("**Results: Table 1** Theta values and their p-values")
+kable(horizontal_table)
 
 ```
 
-To generate bootstrap samples from a Uniform(3, θ) distribution, we
-iterate over θ values from 3 to 12 in steps of 1, generating 100,000
-bootstrap samples for each. The maximum value from each re-sample is
-recorded, and the p-value is computed by comparing the observed
-maximum(*T_max_observed*) with the bootstrap distribution (*t_star*).
+To generate bootstrap samples from a Uniform(3, theta) distribution, we iterate over theta values from 3 to 12 in steps of 1, generating 100,000 bootstrap samples for each. The maximum value from each re-sample is recorded, and the p-value is computed by comparing the observed maximum(*T_max_observed*) with the bootstrap distribution (*t_star*).
 
 ```{r}
 accepted_theta <- c(8, 9, 10, 11)
+ks_results <- list()
 
 for (theta in accepted_theta) {
   ks_test_result <- ks.test(data$After8weeks, "punif", min = 3, max = theta)
-
-  rounded_statistic <- round(ks_test_result$statistic, 3)
-  rounded_p_value <- formatC(ks_test_result$p.value, format = "e", digits = 3)
-  cat("\nKolmogorov-Smirnov Test for Uniform(3,", theta, "):\n")
-  cat("D-statistic:", rounded_statistic, "\n")
-  cat("P-value:", rounded_p_value, "\n")
+  ks_results[[as.character(theta)]] <- list(
+    theta = theta,
+    D_statistic = round(ks_test_result$statistic, 3),
+    p_value = formatC(ks_test_result$p.value, format = "e", digits = 3)
+  )
 }
-
 ```
 
-For θ = 9, θ = 10, and θ = 11 we get a p-value \< 0.05, thus we reject
-H0 indicating that the observed maximum for these values is
-significantly different from the expected maximum under U(3,θ). For θ =
-8, we fail to reject H0, meaning that the data could be from a uniform
-distribution.
+```{r, echo=FALSE, results='asis'}
+for (res in ks_results) {
+  cat("**Kolmogorov-Smirnov Test for Uniform(3,", res$theta, "):**\n")
+  cat("D-statistic:", res$D_statistic, ", P-value:", res$p_value, "\n")
+}
+```
+
+For theta = 9, theta = 10, and theta = 11 we get a p-value \< 0.05, thus we reject H0 indicating that the observed maximum for these values is significantly different from the expected maximum under U(3,theta). For theta = 8, we fail to reject H0, meaning that the data could be from a uniform distribution.
 
 #### Section e
 
-To test whether the median of the cholesterol level is less than 6, we
-will use a Wilcoxon signed-rank test, because it is a non-parametric
-test that does not assume normality, making it suitable for small sample
-sizes and skewed data. The null hypothesis is:
+To test whether the median of the cholesterol level is less than 6, we will use a Wilcoxon signed-rank test, because it is a non-parametric test that does not assume normality, making it suitable for small sample sizes and skewed data. The null hypothesis is:
 
 H0: The median cholesterol level is 6 or greater.
 
-The test yields a p-value of 0.223, meaning we fail to reject H0​. This
-suggests that the median cholesterol level after 8 weeks is not
-significantly less than 6 at the 5% significance level.
+The test yields a p-value of 0.223, meaning we fail to reject H0​. This suggests that the median cholesterol level after 8 weeks is not significantly less than 6 at the 5% significance level.
 
-```{r}
-wilcox.test(data$After8weeks, mu = 6, alternative = "less", exact = FALSE)
+```{r, results='asis'}
+wilcox_result = wilcox.test(data$After8weeks, mu = 6, alternative = "less", exact = FALSE)
 ```
 
-To determine whether the fraction of cholesterol levels below 4.5 after
-8 weeks exceeds 25%, a binomial test is conducted. The null hypothesis
-is:
+```{r, echo=FALSE, results='asis'}
+rounded_V = round(wilcox_result$statistic, 3)
+rounded_p_value = formatC(wilcox_result$p.value, format = "e", digits = 3)
+cat("**Wilcoxon Signed-Rank Test:**", "V-statistic:", rounded_V, ", p-value:", rounded_p_value, "\n")
+
+```
+
+To determine whether the fraction of cholesterol levels below 4.5 after 8 weeks exceeds 25%, a binomial test is conducted. The null hypothesis is:
 
 H0: The fraction of cholesterol levels below 4.5 is at most 25%.
 
-The test yields a p-value of 0.865, meaning we fail to reject H0​ at the
-5% significance level. This suggests that there is no significant
-evidence that the proportion of cholesterol levels below 4.5 is greater
-than 25%.
+The test yields a p-value of 0.865, meaning we fail to reject H0​ at the 5% significance level. This suggests that there is no significant evidence that the proportion of cholesterol levels below 4.5 is greater than 25%.
 
 ```{r}
 count_below_4.5 = sum(data$After8weeks < 4.5)
 binom_result = binom.test(count_below_4.5, length(data$After8weeks), p = 0.25, alternative = "greater")
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, results='asis'}
 rounded_p_value = round(binom_result$p.value, 3)
 rounded_conf_int = round(binom_result$conf.int, 3)
 rounded_prob_estimate = round(binom_result$estimate, 3)
 
 # Print formatted results
-cat("Exact binomial test\n")
-cat("Number of successes:", count_below_4.5, "\n")
-cat("Number of trials:", length(data$After8weeks), "\n")
-cat("P-value:", rounded_p_value, "\n")
-cat("95% Confidence Interval: [", rounded_conf_int, "]\n")
-cat("Estimated probability of success:", rounded_prob_estimate, "\n")
+cat("**Exact binomial test**\n\n")
+cat("Number of successes:", count_below_4.5, ", Number of trials:", length(data$After8weeks), ", p-value:", rounded_p_value, ", 95% CI: [", rounded_conf_int, "], Estimated probability of success:", rounded_prob_estimate, "\n")
 ```
 
 ## Exercise 2: Crops
@@ -452,41 +317,20 @@ First we load the necessary data
 
 ### Section a
 
-We want to investigate whether two factors County and Related (and
-possibly their interaction) influence the crops by performing relevant
-ANOVA model(s), without taking Size into account. So we create and test
-3 separate Null Hypotheses with a two-way ANOVA: H\_(01): There is no
-significant difference in the mean Crops yield across different
-Counties. (the means of observations grouped by country are the same)
-H\_(02): There is no significant difference in the mean Crops yield
-between cases where the landlord and tenant are related versus not
-related. (the means of observations grouped by related are the same)
-H\_(03): There is no interaction effect between County and Related on
-Crops yield (there is no interaction between county and related)
+We want to investigate whether two factors County and Related (and possibly their interaction) influence the crops by performing relevant ANOVA model(s), without taking Size into account. So we create and test 3 separate Null Hypotheses with a two-way ANOVA: H\_(01): There is no significant difference in the mean Crops yield across different Counties. (the means of observations grouped by country are the same) H\_(02): There is no significant difference in the mean Crops yield between cases where the landlord and tenant are related versus not related. (the means of observations grouped by related are the same) H\_(03): There is no interaction effect between County and Related on Crops yield (there is no interaction between county and related)
 
 ```{r}
 model_a <- lm(Crops ~ County * Related, data = crops_data)
 anova(model_a)
 ```
 
-From this table we can see the following: For County:The p-value (0.476)
-is greater than 0.05, meaning we fail to reject the null hypothesis
-H\_(01), suggesting that there is no significant effect of the County on
-the Crops variable. For related: The p-value (0.527) is also greater
-than 0.05, meaning we fail to reject the null hypothesis H\_(02), which
-means that there is no significant effect of whether the landlord and
-tenant are related on the Crops variable. For both: The p-value (0.879)
-is much greater than 0.05, meaning we fail to reject the null hypothesis
-H\_(03), implying there is no significant interaction between County and
-Related on the Crops variable.
+From this table we can see the following: For County:The p-value (0.476) is greater than 0.05, meaning we fail to reject the null hypothesis H\_(01), suggesting that there is no significant effect of the County on the Crops variable. For related: The p-value (0.527) is also greater than 0.05, meaning we fail to reject the null hypothesis H\_(02), which means that there is no significant effect of whether the landlord and tenant are related on the Crops variable. For both: The p-value (0.879) is much greater than 0.05, meaning we fail to reject the null hypothesis H\_(03), implying there is no significant interaction between County and Related on the Crops variable.
 
 ```{r}
 summary(model_a)
 ```
 
-The above model summary table aligns with the ANOVA p-values as both
-show that none of the predictors(County, Related, or their interaction)
-are significant in either table.
+The above model summary table aligns with the ANOVA p-values as both show that none of the predictors(County, Related, or their interaction) are significant in either table.
 
 ```{r, echo=FALSE, fig.height=5}
 # Set up a 1-row, 2-column layout
@@ -510,12 +354,7 @@ interaction.plot(x.factor = crops_data$Related,
 
 ```
 
-While the above plots suggests potential interaction effects
-(non-parallel lines), statistical analysis via ANOVA and linear
-regression indicates that these differences are not statistically
-significant (p \> 0.05). This suggests that observed variations in the
-plot may be due to random noise rather than meaningful effects of County
-or Related on Crops.
+While the above plots suggests potential interaction effects (non-parallel lines), statistical analysis via ANOVA and linear regression indicates that these differences are not statistically significant (p \> 0.05). This suggests that observed variations in the plot may be due to random noise rather than meaningful effects of County or Related on Crops.
 
 Finally, we have to check the model assumptions
 
@@ -542,33 +381,16 @@ round(shapiro.test(residuals(model_a))$p.value, 3)
 round(shapiro.test(residuals(model_a))$statistic, 3)
 ```
 
-The Q-Q plot shows minor deviations from normality, particularly in the
-tails, but the overall trend follows the theoretical quantiles. The
-residuals vs. fitted plot suggests no strong patterns, indicating an
-approximately random distribution of residuals. Given the small sample
-size (n = 30), results should be interpreted with caution, as minor
-departures from normality can impact statistical inference.The
-Shapiro-Wilk test (W = 0.941, p = 0.099) fails to reject the null
-hypothesis of normality at the 0.05 level.
+The Q-Q plot shows minor deviations from normality, particularly in the tails, but the overall trend follows the theoretical quantiles. The residuals vs. fitted plot suggests no strong patterns, indicating an approximately random distribution of residuals. Given the small sample size (n = 30), results should be interpreted with caution, as minor departures from normality can impact statistical inference.The Shapiro-Wilk test (W = 0.941, p = 0.099) fails to reject the null hypothesis of normality at the 0.05 level.
 
-We estimate the crops for County 3 when landlord and tenant are not
-related We implement 2 different ways of the prediction First way: We
-computes the raw mean of Crops for the subset of data where the County
-is “3” and the Related is “no”. This doesn’t account for any potential
-modeling (such as an interaction effect) or covariates and is a
-straightforward group mean estimate.
+We estimate the crops for County 3 when landlord and tenant are not related We implement 2 different ways of the prediction First way: We computes the raw mean of Crops for the subset of data where the County is “3” and the Related is “no”. This doesn’t account for any potential modeling (such as an interaction effect) or covariates and is a straightforward group mean estimate.
 
 ```{r}
 predicted_value <- with(crops_data, mean(Crops[County == "3" & Related == "no"], na.rm=TRUE))
 cat("Estimated crops for County 3 (Landlord and Tenant NOT related):", predicted_value, "\n")
 ```
 
-Second way: We use the emmeans function to estimate the adjusted mean
-crops yield for a typical farm in County 3 where the landlord and tenant
-are not related, based on the fitted linear model (anova_model). The
-emmeans function provides the estimated marginal means, which account
-for the effects of the factors (County and Related) while adjusting for
-any interactions.
+Second way: We use the emmeans function to estimate the adjusted mean crops yield for a typical farm in County 3 where the landlord and tenant are not related, based on the fitted linear model (anova_model). The emmeans function provides the estimated marginal means, which account for the effects of the factors (County and Related) while adjusting for any interactions.
 
 ```{r}
 emm_results <- emmeans::emmeans(model_a, ~ County * Related)
@@ -589,41 +411,28 @@ crops_data$Size <- as.numeric(crops_data$Size)
 crops_data$Crops <- as.numeric(crops_data$Crops)
 ```
 
-We define 3 different models: Model_county_size: This model examines how
-crop yields are influenced by County, Related, and Size, with an
-additional focus on the interaction between County and Size. It does not
-include an interaction term for Related.
+We define 3 different models: Model_county_size: This model examines how crop yields are influenced by County, Related, and Size, with an additional focus on the interaction between County and Size. It does not include an interaction term for Related.
 
 ```{r}
 model_county_size <- lm(Crops ~ Size * County + Related, data = crops_data)
 anova(model_county_size)
 ```
 
-Model_related_size: This model evaluates how County, Related, and Size
-affect crop yields, and it adds an interaction term for Related and Size
-to test if the effect of Size on crop yields depends on whether the
-landlord and tenant are related.
+Model_related_size: This model evaluates how County, Related, and Size affect crop yields, and it adds an interaction term for Related and Size to test if the effect of Size on crop yields depends on whether the landlord and tenant are related.
 
 ```{r}
 model_related_size <- lm(Crops ~ Size * Related + County, data = crops_data)
 anova(model_related_size)
 ```
 
-Model_additive: This model assumes that the effect of each factor on
-crop yield is independent of the others. It does not test for any
-interaction effects, only the individual contributions of County,
-Related, and Size to crop yields.
+Model_additive: This model assumes that the effect of each factor on crop yield is independent of the others. It does not test for any interaction effects, only the individual contributions of County, Related, and Size to crop yields.
 
 ```{r}
 model_additive <- lm(Crops ~ Size + County + Related, data = crops_data)
 anova(model_additive)
 ```
 
-We have tested interaction models as well as purely additive. The
-interaction Size-Related and the individual effect of County and Related
-are insignificant(all 3 have p-values\>0.5). Therefore, the best model
-is model_county_size, since it shows the significance of Size and of the
-interaction Size-County.
+We have tested interaction models as well as purely additive. The interaction Size-Related and the individual effect of County and Related are insignificant(all 3 have p-values\>0.5). Therefore, the best model is model_county_size, since it shows the significance of Size and of the interaction Size-County.
 
 Finally, we can check this model's assumptions.
 
@@ -638,20 +447,14 @@ hist(residuals(model_county_size), main = "Histogram of Residuals", xlab = "Resi
 
 ```
 
-We check normality assumptions for the full model only, since the other
-3 are subset of it.
+We check normality assumptions for the full model only, since the other 3 are subset of it.
 
 ```{r}
 round(shapiro.test(residuals(model_county_size))$p.value, 3)
 round(shapiro.test(residuals(model_county_size))$statistic, 3)
 ```
 
-The Shapiro-Wilk normality test for the residuals of model_county_size
-returned a p-value of 0.733 \> 0.05. This indicates that we fail to
-reject the null hypothesis, meaning there is no significant evidence to
-suggest that the residuals deviate from a normal distribution. From the
-QQ-plot, the points mainly follow a straight line and the histogram has
-a bell-like shape.
+The Shapiro-Wilk normality test for the residuals of model_county_size returned a p-value of 0.733 \> 0.05. This indicates that we fail to reject the null hypothesis, meaning there is no significant evidence to suggest that the residuals deviate from a normal distribution. From the QQ-plot, the points mainly follow a straight line and the histogram has a bell-like shape.
 
 ### Section c
 
@@ -659,43 +462,14 @@ a bell-like shape.
 summary(model_county_size)
 ```
 
-The coefficient for Size is 22.704 (p\<0.001), meaning that for County 1
-(the reference level), an increase of 1 unit in Size leads to an
-expected increase of 22.7 units in Crops, assuming all other factors
-remain constant. This effect is statistically significant, indicating
-that Size has a strong positive influence on Crops. County 2 has a
-negative coefficient of -4214.050 (p\<0.01), meaning that, for the same
-Size, crops in County 2 are expected to be 4214 units lower than in
-County 1. County 3 has a coefficient of -1284.813, but it is not
-statistically significant (p=0.334\>0.05), suggesting that the
-difference between County 3 and County 1 is not strong enough to be
-conclusive. The coefficient for Related is -239.099, but its p-value is
-0.499, meaning that this effect is not statistically significant. This
-suggests that the relationship between the landlord and tenant does not
-significantly influence crop yields. Size:County2 has a coefficient of
-26.590 (p=0.003\<0.05), meaning that the effect of Size on Crops in
-County 2 is higher than in County 1. Specifically, the crop yield
-increase per unit Size is 22.7+26.6=49.3 in County 2. Size:County3 has a
-coefficient of 8.916, but it is not statistically significant (p=0.176),
-meaning we cannot confidently conclude that the Size effect in County 3
-differs significantly from County 1. The model explains 86.6% of the
-variation in crops (R\^2=0.866), making it a strong explanatory model.
+The coefficient for Size is 22.704 (p\<0.001), meaning that for County 1 (the reference level), an increase of 1 unit in Size leads to an expected increase of 22.7 units in Crops, assuming all other factors remain constant. This effect is statistically significant, indicating that Size has a strong positive influence on Crops. County 2 has a negative coefficient of -4214.050 (p\<0.01), meaning that, for the same Size, crops in County 2 are expected to be 4214 units lower than in County 1. County 3 has a coefficient of -1284.813, but it is not statistically significant (p=0.334\>0.05), suggesting that the difference between County 3 and County 1 is not strong enough to be conclusive. The coefficient for Related is -239.099, but its p-value is 0.499, meaning that this effect is not statistically significant. This suggests that the relationship between the landlord and tenant does not significantly influence crop yields. Size:County2 has a coefficient of 26.590 (p=0.003\<0.05), meaning that the effect of Size on Crops in County 2 is higher than in County 1. Specifically, the crop yield increase per unit Size is 22.7+26.6=49.3 in County 2. Size:County3 has a coefficient of 8.916, but it is not statistically significant (p=0.176), meaning we cannot confidently conclude that the Size effect in County 3 differs significantly from County 1. The model explains 86.6% of the variation in crops (R\^2=0.866), making it a strong explanatory model.
 
 ```{r}
 confint(model_county_size)
 
 ```
 
-For Size, the CI does not include 0 confirming a strong and
-statistically significant positive effect of Size on Crops. The CI of
-County2 does not include 0 confirming statistical significance, while
-for County3 it does meaning there is no strong evidence that County3
-differs significantly from County1. The CI of Related includes zero, so
-this effect is not statistically significant and we cannot conclude that
-relationship status affects crop yield. The CI of the Size-County2
-interaction does not include 0 confirming significance, while the same
-for County3 includes zero, so we cannot confidently say that the effect
-of Size is different in County3 compared to County1.
+For Size, the CI does not include 0 confirming a strong and statistically significant positive effect of Size on Crops. The CI of County2 does not include 0 confirming statistical significance, while for County3 it does meaning there is no strong evidence that County3 differs significantly from County1. The CI of Related includes zero, so this effect is not statistically significant and we cannot conclude that relationship status affects crop yield. The CI of the Size-County2 interaction does not include 0 confirming significance, while the same for County3 includes zero, so we cannot confidently say that the effect of Size is different in County3 compared to County1.
 
 ### Section d
 
@@ -706,8 +480,7 @@ pred <- emmeans::emmeans(model_county_size, specs = ~ County * Related * Size,
 summary(pred)
 ```
 
-The predicted yield crops for a farm from County 2 of size 165, with
-related landlord and tenant is 6141, with a 95% CI: (5428, 6855)
+The predicted yield crops for a farm from County 2 of size 165, with related landlord and tenant is 6141, with a 95% CI: (5428, 6855)
 
 ```{r}
 pred_se <- summary(pred)$SE
@@ -721,10 +494,7 @@ cat("Residual Variance (sigma^2):", sigma(model_county_size)^2, "\n")
 cat("Total Variance:",pred_var + sigma(model_county_size)^2)
 ```
 
-The prediction variance is much smaller than the residual variance,
-which suggests that the model's coefficient estimates are relatively
-stable and that most of the uncertainty comes from residual variation
-rather than parameter estimation.
+The prediction variance is much smaller than the residual variance, which suggests that the model's coefficient estimates are relatively stable and that most of the uncertainty comes from residual variation rather than parameter estimation.
 
 # Exercise 3
 
