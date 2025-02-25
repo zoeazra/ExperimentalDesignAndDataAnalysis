@@ -31,6 +31,7 @@ highlight: tango
 #### Section c
 
 # Exercise 3: Stormer viscometer
+
 #### Section a
 
 #### Section b
@@ -40,7 +41,4 @@ highlight: tango
 #### Section d
 
 #### Section e
-
-
 :::
-
