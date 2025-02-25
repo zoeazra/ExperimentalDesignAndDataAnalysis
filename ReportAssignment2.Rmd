@@ -1,0 +1,46 @@
+---
+title: "Assignment 2 - Report"
+author: "Eleni Liarou, Zoë Azra Blei, Frederieke Loth, group 20"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    latex_engine: xelatex
+fontsize: 11pt
+highlight: tango
+---
+
+::: {style="text-align: justify;"}
+# Exercise 1: Titanic
+
+#### Section a
+
+#### Section b
+
+#### Section c
+
+#### Section d
+
+#### Section e
+
+# Exercise 2: Military Coups
+
+#### Section a
+
+#### Section b
+
+#### Section c
+
+# Exercise 3: Stormer viscometer
+#### Section a
+
+#### Section b
+
+#### Section c
+
+#### Section d
+
+#### Section e
+
+
+:::
+
