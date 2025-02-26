@@ -14,6 +14,100 @@ highlight: tango
 
 #### Section a
 
+```{r, include=FALSE}
+data_titanic <- as.data.frame(read.table("titanic.txt", header=TRUE))
+data_titanic$PClass <- as.factor(data_titanic$PClass)
+data_titanic$Sex <- as.factor(data_titanic$Sex)
+summary(data_titanic)
+```
+
+From the summary, we see that 3rd class passengers outnumbered those in 1st and 2nd classes combined. 35% of passengers were female, and 65% male. Half the passengers were aged between 21 and 39, with 557 missing age values. The survival rate has a mean of 0.3427, indicating around one-third of passengers survived. However, the dataset is incomplete, containing data for only 1,313 of the 2,224 passengers.
+
+```{r, fig.height=3, fig.width=7, echo=FALSE}
+#syrvival rate by sex, class and age
+par(mfrow = c(1, 3))
+
+# 1. Survival Rate by Sex
+sex_survival <- table(data_titanic$Sex, data_titanic$Survived)
+barplot(prop.table(sex_survival, margin = 1), beside = TRUE, 
+        col = c("darkred", "darkgoldenrod1"), legend = c("Died", "Survived"),
+        main = "Survival Rate by Sex", ylab = "Proportion", 
+        names.arg = c("Female", "Male"))  # Explicitly set labels
+
+# 2. Survival Rate by Passenger Class
+# Create the contingency table
+# Create the contingency table
+class_survival <- table(data_titanic$Survived, data_titanic$PClass)
+
+# Plot the bar plot
+barplot(class_survival, beside = TRUE, 
+        col = c("darkred", "darkgoldenrod1"), 
+        legend.text = c("Died", "Survived"),  # Correct legend labels for survival
+        main = "Survival Rate by Passenger Class", 
+        ylab = "Proportion", 
+        names.arg = c("1st", "2nd", "3rd"),  # Set labels for passenger class
+        ylim = c(0, max(class_survival) * 1.1))  # Adjust y-axis to fit data
+
+titanic_clean <- na.omit(data_titanic)
+
+# 3. Survival Rate by Age (Histogram)
+hist(titanic_clean$Age[titanic_clean$Survived == 1], breaks = 20, col = "darkgoldenrod1", 
+     main = "Age Distribution of Survivors", xlab = "Age", freq = FALSE)
+
+# Adding the "Died" histogram on top with a transparent red color
+hist(titanic_clean$Age[titanic_clean$Survived == 0], breaks = 20, col = rgb(1, 0, 0, 0.5), 
+     add = TRUE, freq = FALSE)
+
+# Legend for the plot
+legend("topright", legend = c("Survived", "Died"), fill = c("darkgoldenrod1", rgb(1, 0, 0, 0.5)))
+
+```
+
+More females than males died, and most 3rd class passengers did not survive. The highest number of both survivors and deaths were among passengers aged 20 to 30.
+
+```{r, fig.height=3, fig.width=7, echo=FALSE}
+par(mfrow = c(1, 2))
+ #5. Age Distribution by Class (Boxplot)
+boxplot(Age ~ PClass, data = titanic_clean, main = "Age Distribution by Class", 
+        col = c("lightblue", "lightgreen", "lightpink"), ylab = "Age")
+
+hist(data_titanic$Age, xlab="Age", main="Age Distribution of Passengers", col="coral1")
+```
+
+The majority of passengers were around 25 years old, with fewer individuals in older age groups. 1st class passengers were generally older than those in 2nd and 3rd class.
+
+Let's examine how the sexes were distributed over the passenger classes.
+
+```{r, echo=FALSE}
+sex_class <-xtabs(~PClass+Sex, data=data_titanic)
+sex_class
+```
+
+As expected, since there are more males overall, each passenger class has a higher number of males.
+
+```{r}
+sex_class_surv <- xtabs(Survived~PClass+Sex, data=data_titanic)
+round(sex_class_surv/sex_class, 2)
+```
+
+The survival rate decreases from 1st to 3rd class, but remains significantly higher for females across all classes. However, the difference in survival between females and males is less pronounced in 3rd class.
+
+We will now fit a logistic regression model to investigate the association between the survival status and the predictors *PClass*, *Age* and *Sex.*
+
+```{r}
+# Fit the logistic regression model
+model <- glm(Survived ~ PClass + Age + Sex, data = titanic_clean, family = binomial)
+summary(model)$coefficients
+```
+
+The odds can be calculated using the estimates of the above table as:
+
+$$
+\text{odds} = e^{\text{log-odds}} = e^{3.7597 + (-1.292) \times \text{PClass2nd} + (-2.521) \times \text{PClass3rd} + (-0.0392) \times \text{Age} + (-2.631) \times \text{Sexmale}} 
+$$
+
+Being in 2nd or 3rd class significantly reduces the probability of survival compared to 1st class. Older age is associated with a lower likelihood of survival, while being male significantly decreases the chances of survival compared to being female. The magnitude of the coefficients reflects the sensitivity of survival odds to each variable. Being male has the largest negative effect on survival, while age has the smallest effect in comparison to class and sex.
+
 #### Section b
 
 #### Section c
