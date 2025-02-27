@@ -10,6 +10,10 @@ highlight: tango
 ---
 
 ::: {style="text-align: justify;"}
+```{r setup, echo=FALSE}
+options(digits = 3)
+```
+
 # Exercise 1: Titanic
 
 #### Section a
@@ -97,7 +101,7 @@ We will now fit a logistic regression model to investigate the association betwe
 ```{r}
 # Fit the logistic regression model
 model <- glm(Survived ~ PClass + Age + Sex, data = titanic_clean, family = binomial)
-summary(model)$coefficients
+summary(model)
 ```
 
 The odds can be calculated using the estimates of the above table as:
@@ -110,9 +114,65 @@ Being in 2nd or 3rd class significantly reduces the probability of survival comp
 
 #### Section b
 
+Investigating the interaction between Age and PClass.
+
+```{r}
+glm2 <- glm(Survived ~ Age * PClass, data=data_titanic, family="binomial")
+anova(glm2, test="Chisq")
+```
+
+We observe that the interaction Age-PClass is not significant, since it has a p-value of 0.558\>0.05.
+
+```{r}
+glm3 <- glm(Survived ~ Age * Sex, data=data_titanic, family="binomial")
+anova(glm3, test="Chisq")
+```
+
+In this case, we see that the interaction Age-Sex is significant(p-value=5.645e-07 \< 0.05), so we have to include it in our model. PClass is also significant by itself so we have to include it too.
+
+So the final model is:
+
+```{r}
+final_model <- glm(Survived ~ PClass + Age+ Sex + Age*Sex, data=data_titanic, family="binomial")
+summary(final_model, test="Chisq")
+```
+
+From the table above, we observe that Sexmale and **Age** are not statistically significant. This model has an AIC of 679.1, which is lower than the additive model’sAIC of 705.1. Since a lower AIC indicates a better balance between fit and complexity, we choose this model over the additive one.
+
+Using this model, we can now estimate the probability of survival for each combination of levels of the factors PClass and *Sex* for a person of age 55.
+
+```{r}
+new_data <- expand.grid(Age = 55, 
+                        PClass = levels(data_titanic$PClass), 
+                        Sex = levels(data_titanic$Sex))
+probabilities <- predict(final_model, newdata = new_data, type = "response")
+cbind(new_data, Survival_Prob = round(probabilities, 3))
+```
+
+From the table above, we see once again that being female significantly increases the chance of survival, while survival probability decreases progressively from 1st to 3rd class.
+
 #### Section c
 
 #### Section d
+
+```{r}
+cont_table_class <- table(data_titanic$Survived, data_titanic$PClass)
+cont_table_sex <- table(data_titanic$Survived, data_titanic$Sex)
+```
+
+We will use Fisher's exact test to examine the effect of sex on survival status since it is more suitable for 2x2 tables and the 2-test to investigate the effect of class on survival status.
+
+```{r}
+fisher.test(cont_table_sex)
+```
+
+```{r}
+chisq.test(cont_table_class)
+```
+
+Both tests show that class and sex are strongly associated with survival.
+
+The 2-test for the relationship between passenger class (PClass) and **survival status (Survived)** reveals a significant association, with a test statistic of 172 and a p-value less than 2e-16. This indicates that survival is strongly influenced by passenger class, with the null hypothesis of no association being rejected. Similarly, Fisher’s Exact Test for **gender (Sex)** and **survival status (Survived)** shows a highly significant result (p-value \< 2e-16). The odds ratio of 0.1 suggests that females have much higher odds of surviving than males, with a 95% confidence interval (0.0762, 0.1316) confirming that the true odds ratio is significantly less than 1. This supports the conclusion that being female substantially increases the chances of survival.
 
 #### Section e
 
