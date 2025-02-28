@@ -32,11 +32,110 @@ highlight: tango
 
 # Exercise 3: Stormer viscometer
 
+```{r, echo=FALSE}
+library(MASS)
+data(stormer)
+```
+
 #### Section a
+
+```{r}
+theta1_init = 1
+theta2_init = mean(stormer$Wt)
+nls_model = nls(Time ~ (theta1 * Viscosity) / (Wt - theta2), 
+            data = stormer,start = list(theta1 = theta1_init, theta2 = theta2_init))
+summary(model)
+```
+
+```{r}
+lm_model = lm(Wt * Time ~ Viscosity + Time, data = stormer)
+
+summary(lm_model)
+```
+
+```{r}
+library(MASS)
+data(stormer)
+
+# Scatterplot of data - Ensure it initializes properly
+plot(stormer$Viscosity, stormer$Time, 
+     main = "Time vs Viscosity with Model Fits",
+     xlab = "Viscosity", ylab = "Time", pch = 16, col = "black")
+
+# Generate sequence of viscosity values for smooth curve
+visc_values <- seq(min(stormer$Viscosity), max(stormer$Viscosity), length.out = 100)
+wt_values <- rep(mean(stormer$Wt), length(visc_values))  # Use mean Wt
+
+# Predict nonlinear model fit
+nls_pred <- predict(nls_model, newdata = data.frame(Viscosity = visc_values, Wt = wt_values))
+
+# Ensure valid predictions before plotting
+if (!all(is.na(nls_pred))) {
+  lines(visc_values, nls_pred, col = "blue", lwd = 2, lty = 2)  # Nonlinear fit (red dashed line)
+} else {
+  print("Nonlinear predictions contain NA values. Not plotting the fit.")
+}
+
+# Fit and add linear model
+lm_model <- lm(Wt * Time ~ Viscosity + Time, data = stormer)
+lm_pred <- predict(lm_model)
+points(stormer$Viscosity, lm_pred / stormer$Wt, col = "red", pch = 4)  # Linear fit (green X)
+
+# Add legend
+legend("topright", legend = c("Data", "Nonlinear Fit", "Linear Fit"),
+       col = c("black", "blue", "red"), pch = c(16, NA, 4), lty = c(NA, 2, NA), lwd = c(NA, 2, NA))
+
+```
 
 #### Section b
 
+```{r}
+# Given values from nls() summary
+theta1_hat <- 29.4013  # Estimated parameter
+theta1_se <- 0.9155    # Standard error
+theta1_h0 <- 25        # Hypothesized value under H0
+df <- 21               # Degrees of freedom from nls summary
+
+# Compute t-statistic
+t_stat <- (theta1_hat - theta1_h0) / theta1_se
+
+# Compute p-value for two-tailed test
+p_value <- 2 * pt(-abs(t_stat), df)
+
+# Display results
+cat("Test Statistic (t):", t_stat, "\n")
+cat("P-value:", p_value, "\n")
+
+# Decision Rule
+if (p_value < 0.05) {
+  cat("Reject H0: There is significant evidence that θ1 ≠ 25.\n")
+} else {
+  cat("Fail to reject H0: No significant evidence that θ1 differs from 25.\n")
+}
+
+```
+
 #### Section c
+
+```{r}
+# Given values from nls() summary
+theta1_hat <- 29.4013  # Estimated θ1
+theta1_se <- 0.9155    # Standard error of θ1
+theta2_hat <- 2.2183   # Estimated θ2
+theta2_se <- 0.6655    # Standard error of θ2
+
+# z-score for 92% confidence level
+z_value <- qnorm(0.96)  # 1.75
+
+# Compute confidence intervals
+theta1_CI <- c(theta1_hat - z_value * theta1_se, theta1_hat + z_value * theta1_se)
+theta2_CI <- c(theta2_hat - z_value * theta2_se, theta2_hat + z_value * theta2_se)
+
+# Print results
+cat("92% CI for θ1:", theta1_CI, "\n")
+cat("92% CI for θ2:", theta2_CI, "\n")
+
+```
 
 #### Section d
 
