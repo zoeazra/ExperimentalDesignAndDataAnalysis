@@ -39,21 +39,23 @@ data(stormer)
 
 #### Section a
 
+The nonlinear regression model estimates $\theta_1$ as -3.219 (p = 0.638) and $\theta_2$ as 55.045 (p \< 0.001), indicating that only $\theta_2$ is statistically significant. The high residual standard error (95.17) suggests a poor fit, and the nonlinear model may not effectively capture the relationship between Time, Viscosity, and Weight. The linear regression model achieves a much higher R-squared = 0.9938, indicating a strong fit to the data. Both Viscosity (p \< 2e-16) and Time (p = 0.00987) are statistically significant in the linear model. However, a high R-squared could also suggest possible overfitting. The large residual standard error (207.3) and some large residuals suggest that the model may be capturing noise rather than true patterns in the data. The plot below shows that the nonlinear fit does not align well with the data, while the linear fit provides a reasonable approximation, which could be because of overfitting, as mentioned. Given that the problem is based on a nonlinear theoretical model, forcing a linear approximation does not make sense, as it ignores the true structure of the data. While the nonlinear model may not fit the data as well numerically, it is more theoretically sound and better reflects the expected relationship between the variables. Therefore, relying on the linear model would be misleading, and refining the nonlinear model (e.g., with better parameter estimation or transformations) would be a more appropriate approach.
+
 ```{r}
 theta1_init = 1
 theta2_init = mean(stormer$Wt)
 nls_model = nls(Time ~ (theta1 * Viscosity) / (Wt - theta2), 
-            data = stormer,start = list(theta1 = theta1_init, theta2 = theta2_init))
-summary(model)
+            data = stormer,start = list(theta1 = theta1_init, theta2 =
+            theta2_init))
+summary(nls_model)
 ```
 
 ```{r}
 lm_model = lm(Wt * Time ~ Viscosity + Time, data = stormer)
-
 summary(lm_model)
 ```
 
-```{r}
+```{r, echo=FALSE, fig.width=7, fig.height=5}
 library(MASS)
 data(stormer)
 
@@ -89,55 +91,96 @@ legend("topright", legend = c("Data", "Nonlinear Fit", "Linear Fit"),
 
 #### Section b
 
+A two-tailed t-test is conducted, as we have no expectation about whether $\theta_1$ will be greater or smaller than 25; it could differ in either direction. We consider the null hypothesis H0: $\theta_1$ = 25. For the test, we use the estimated $\theta_1$ and its standard error obtained from question a). The test resulted in a t-statistic of 4.81 and a p-value of 9.45e-05, which is far below the typical significance level of 0.05. This means we reject H0 and conclude that $\theta_1$ is significantly different from 25, further supporting the nonlinear model' results.
+
 ```{r}
-# Given values from nls() summary
-theta1_hat <- 29.4013  # Estimated parameter
-theta1_se <- 0.9155    # Standard error
-theta1_h0 <- 25        # Hypothesized value under H0
-df <- 21               # Degrees of freedom from nls summary
+theta1_hat = 29.4013  # Estimated parameter
+theta1_se = 0.9155    # Standard error
+theta1_h0 = 25        # Hypothesized value under H0
+df = 21               # Degrees of freedom from nls summary
 
-# Compute t-statistic
-t_stat <- (theta1_hat - theta1_h0) / theta1_se
+t_stat = (theta1_hat - theta1_h0) / theta1_se
+p_value = 2 * pt(-abs(t_stat), df)
+```
 
-# Compute p-value for two-tailed test
-p_value <- 2 * pt(-abs(t_stat), df)
-
-# Display results
-cat("Test Statistic (t):", t_stat, "\n")
-cat("P-value:", p_value, "\n")
-
-# Decision Rule
-if (p_value < 0.05) {
-  cat("Reject H0: There is significant evidence that θ1 ≠ 25.\n")
-} else {
-  cat("Fail to reject H0: No significant evidence that θ1 differs from 25.\n")
-}
-
+```{r,echo=FALSE,results='asis'}
+rounded_p = formatC(p_value, format = "e", digits = 3)
+cat("**Test Statistic (t):**", round(t_stat,3), "\n\n")
+cat("**P-value:**", rounded_p, "\n")
 ```
 
 #### Section c
 
+For computing the 92% confidence interval for $\theta_1$ and $\theta_2$, we consider the following formula to calculate the z-value: $$
+\hat{\theta} \pm z_{\alpha/2} \cdot SE(\theta)
+$$ where $z_{\alpha/2}$ is the critical value from the standard normal distribution. For a 92% confidence level, the significance level is $\alpha$ = 0.08, thus: $$z_{0.04/2} = z_{0.02} \approx 1.75$$
+
+This gave a 92% CI for $\theta_1$​ of [27.80, 31.00] and for $\theta_2$​ of [1.05, 3.38], meaning we are 92% confident that the true values lie within these intervals. Since the confidence interval for $\theta_1$​ does not include 25, it further supports rejecting H0​ from question b).
+
 ```{r}
-# Given values from nls() summary
 theta1_hat <- 29.4013  # Estimated θ1
 theta1_se <- 0.9155    # Standard error of θ1
 theta2_hat <- 2.2183   # Estimated θ2
 theta2_se <- 0.6655    # Standard error of θ2
 
-# z-score for 92% confidence level
-z_value <- qnorm(0.96)  # 1.75
+z_value = qnorm(0.96)  # 1.75
 
-# Compute confidence intervals
-theta1_CI <- c(theta1_hat - z_value * theta1_se, theta1_hat + z_value * theta1_se)
-theta2_CI <- c(theta2_hat - z_value * theta2_se, theta2_hat + z_value * theta2_se)
+theta1_CI = c(theta1_hat - z_value * theta1_se, theta1_hat + z_value * theta1_se)
+theta2_CI = c(theta2_hat - z_value * theta2_se, theta2_hat + z_value * theta2_se)
+```
 
-# Print results
-cat("92% CI for θ1:", theta1_CI, "\n")
-cat("92% CI for θ2:", theta2_CI, "\n")
-
+```{r,echo=FALSE,results='asis'}
+cat("**92% CI for θ1:** [", round(theta1_CI,3), "]\n\n")
+cat("**92% CI for θ2:** [", round(theta2_CI,3), "]\n")
 ```
 
 #### Section d
 
+The expected values are computed using the nonlinear model with $w$ = 50, and viscosity values ranging from 10 to 300. The 94% confidence intervals were derived using asymptotic normality, where the standard error of T was estimated through error propagation. The confidence bounds were calculated as:
+
+$$T(v) \pm z_{\alpha/2} \cdot SE(T)$$
+
+where $z_{0.03}$ = 1.88 is the critical value for a 94% confidence level. The plot shows the expected T along with a shaded confidence band, indicating the uncertainty in our estimates. The confidence interval widens as viscosity increases, reflecting greater uncertainty for larger $v$. The linear trend suggests a strong relationship between viscosity and time, but further diagnostics are needed to confirm model assumptions. Overall, the plot aligns well with the theoretical nonlinear model, supporting its validity over a simple linear approximation.
+
+```{r, echo=FALSE}
+library(ggplot2)
+```
+
+```{r}
+theta1_hat = 29.4013  # Estimate of theta1
+theta2_hat = 2.2183   # Estimate of theta2
+theta1_se = 0.9155    # Standard error of theta1
+theta2_se = 0.6655    # Standard error of theta2
+w_fixed = 50
+v_values = seq(10, 300, length.out = 100)
+
+# Compute expected T values using the nonlinear model: T = (theta1 * v) / (w - theta2)
+T_hat <- (theta1_hat * v_values) / (w_fixed - theta2_hat)
+
+# Compute standard error propagation for T
+T_se <- sqrt(
+  (v_values / (w_fixed - theta2_hat))^2 * theta1_se^2 +
+  (theta1_hat * v_values / (w_fixed - theta2_hat)^2)^2 * theta2_se^2
+)
+
+# Compute 94% confidence intervals
+z_value <- qnorm(0.97)  # z-value for 94% confidence interval (alpha = 0.06, so z(0.03) = 1.88)
+T_lower <- T_hat - z_value * T_se
+T_upper <- T_hat + z_value * T_se
+```
+
+```{r,echo=FALSE, fig.width=6, fig.height=3}
+df <- data.frame(v_values, T_hat, T_lower, T_upper)
+# Plot the expected T with 94% confidence interval
+ggplot(df, aes(x = v_values, y = T_hat)) +
+  geom_line(color = "blue", linewidth = 1) +  # Expected T
+  geom_ribbon(aes(ymin = T_lower, ymax = T_upper), alpha = 0.2, fill = "blue") +  # Confidence band
+  labs(title = "94% Confidence Interval for Expected T",
+       x = "Viscosity (v)", y = "Expected Time (T)") +
+  theme_minimal()
+```
+
 #### Section e
+
+To investigate whether the smaller model with $\theta_1$ = 25 is appropriate, we compare it to the estimated model using hypothesis testing and model evaluation metrics. From question b), the T-test rejected H0: $\theta_1$ =25 with a p-value of 9.45e-05, indicating that setting $\theta_1$ = 25 significantly deviates from the data. Additionally, the 92% confidence interval for $\theta_1$ of [27.80, 31.00] does not contain 25, further supporting that the restriction is inappropriate. A likelihood ratio test could be performed to formally compare the smaller model to the unrestricted model, however, the hypothesis test already suggests a poor fit. Constraining $\theta_1$ may lead to higher residual errors and reduced model flexibility, making the model less accurate. Given these findings, the smaller model does not seem appropriate, as it forces an assumption that contradicts the observed data. Therefore, the unrestricted nonlinear model remains the more valid choice.
 :::
