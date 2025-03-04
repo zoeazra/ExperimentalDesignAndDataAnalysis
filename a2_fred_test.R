@@ -41,6 +41,13 @@ summary(poisson_reg5)
 
 
 # Get all columns of which to take average
-char_avg <- setdiff(names(data), c("miltcoup", "pollib"))
-char_avg <- data[, setdiff(names(data), c("miltcoup", "pollib"))]
+cols <- data[, setdiff(names(data), c("miltcoup", "pollib"))]
+
+# Take means
+cols_means <- colMeans(cols)
+cols_means
+
+# store the data
+data2 <- data.frame(pollib = 0, t(cols_means))
+data2
 
