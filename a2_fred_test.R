@@ -3,9 +3,7 @@ library(MASS)
 
 # Read and display data from coup.txt
 data <- read.table("coups.txt", header = TRUE, row.names = 1)
-data
-
-str(data)
+names(data)
 
 # To access full dataset use .
 #miltcoup is response var
@@ -35,7 +33,14 @@ poisson_reg4 <- glm(miltcoup ~ oligarchy + pollib + parties + pctvote,
 summary(poisson_reg4)
 
 
+# Everything p < 0.05
 poisson_reg5 <- glm(miltcoup ~ oligarchy + pollib + parties, 
                     data = data,
                     family = poisson)
 summary(poisson_reg5)
+
+
+# Get all columns of which to take average
+char_avg <- setdiff(names(data), c("miltcoup", "pollib"))
+char_avg <- data[, setdiff(names(data), c("miltcoup", "pollib"))]
+
