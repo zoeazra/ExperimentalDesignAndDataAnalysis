@@ -24,6 +24,11 @@ highlight: tango
 
 # Exercise 2: Military Coups
 
+```{r include=FALSE}
+library(MASS)
+data <- read.table("coups.txt", header = TRUE, row.names = 1)
+```
+
 #### Section a
 
 #### Section b
