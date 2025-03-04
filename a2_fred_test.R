@@ -48,6 +48,13 @@ cols_means <- colMeans(cols)
 cols_means
 
 # store the data
-data2 <- data.frame(pollib = 0, t(cols_means))
+data2 <- data.frame(pollib = c(0, 1, 2), t(cols_means))
 data2
 
+# Make prediction from data2 and last model
+predicted_coups <- predict(poisson_reg5, newdata = data2, type = 'response')
+predicted_coups
+
+data.frame(pollib = c(0, 1, 2), predicted_coups = predicted_coups)
+
+# Nodig om andere dingen nou ook te predicten of enkel coups en daarvan averages?
