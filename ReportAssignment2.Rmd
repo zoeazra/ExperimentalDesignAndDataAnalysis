@@ -68,9 +68,9 @@ legend("topright", legend = c("Survived", "Died"), fill = c("darkgoldenrod1", rg
 
 ```
 
-More females than males died, and most 3rd class passengers did not survive. The highest number of both survivors and deaths were among passengers aged 20 to 30.
+More males than females died, and most 3rd class passengers did not survive. The highest number of both survivors and deaths were among passengers aged 20 to 30.
 
-From the belowe graphs we see that the majority of passengers were around 25 years old, with fewer individuals in older age groups. 1st class passengers were generally older than those in 2nd and 3rd class.
+From the below graphs we see that the majority of passengers were around 25 years old, with fewer individuals in older age groups. 1st class passengers were generally older than those in 2nd and 3rd class.
 
 ```{r, fig.height=3, fig.width=7, echo=FALSE}
 par(mfrow = c(1, 2))
@@ -180,7 +180,7 @@ cat("Chi-squared value:", chisq_result$statistic, "Degrees of freedom:", chisq_r
 
 Both tests show that class and sex are strongly associated with survival.
 
-The 2-test for the relationship between passenger class and survival status reveals a significant association, with a test statistic of 172 and a p-value less than 2e-16. This indicates that survival is strongly influenced by passenger class, with the null hypothesis of no association being rejected. Similarly, Fisher’s Exact Test for gender and survivalstatus shows a highly significant result (p-value \< 2e-16). The odds ratio of 0.1 suggests that females have much higher odds of surviving than males, with a 95% confidence interval (0.0762, 0.1316) confirming that the true odds ratio is significantly less than 1. This supports the conclusion that being female substantially increases the chances of survival.
+The 2-test for the relationship between passenger class and survival status reveals a significant association, with a test statistic of 172 and a p-value less than 2e-16. This indicates that survival is strongly influenced by passenger class, with the null hypothesis of no association being rejected. Similarly, Fisher’s Exact Test for gender and survival status shows a highly significant result (p-value \< 2e-16). The odds ratio of 0.1 suggests that females have much higher odds of surviving than males, with a 95% confidence interval (0.0762, 0.1316) confirming that the true odds ratio is significantly less than 1. This supports the conclusion that being female substantially increases the chances of survival.
 
 #### Section e
 
