@@ -24,13 +24,25 @@ highlight: tango
 
 # Exercise 2: Military Coups
 
-```{r include=FALSE}
+```{r echo=FALSE}
 library(MASS)
 data <- read.table("coups.txt", header = TRUE, row.names = 1)
+
+# Transform 'pollib' into a factor, as we think it may not have a linear effect
+data$pollib <- as.factor(data$pollib)
 ```
 
 #### Section a
+Note that we transformed 'pollib' into a factor since we predicted the effect to be non-linear. This was found to be correct after comparing the different Poisson model outcomes. 'pollib = 1' and 'pollib = 2' are henceforth compared to the value of 'pollib = 0'
 
+``` {r echo=FALSE}
+poisson_reg <- glm (miltcoup ~ ., data = data, family = poisson)
+summary(poisson_reg)
+```
+
+We determine that variables for which p-value > 0.05 do not have a statistically significant effect on our response variable 'miltcoup' which signifies the number of military coups. Moreover, a positive coefficient details that an increase in the corresponding variable indicates an increase in 'miltcoup'. We can therefore state the following: 'oligarchy' and 'parties' are statistically significant with a positive effect on 'miltcoup'. 'pollib1' has a slightly significant and negative effect on 'miltcoup' whilst 'pollib2' has a significant negative effect. We can thus say that according to the data, countries with a higher political liberation factor may experience less military coups.
+
+# Remove insignificant pieces one by one (summary)
 #### Section b
 
 #### Section c

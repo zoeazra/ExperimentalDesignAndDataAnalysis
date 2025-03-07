@@ -19,7 +19,8 @@ summary(poisson_reg)
 
 # We can interpret the data further by looking at the sign of the coefficient. This details that 
 # an increase oligarchy, and parties, increases miltcoup. While in increase in pollib indicate a decrease in miltcoup.
-
+# we also see that pollib1 is slightly significant (0.05 < p < 0.1) whilst pollib2 is quite significant with a negative effect, meaning that a higher degree of political 
+#liberization experrience a lower amount of military coups.
 # Remove insignificant pieces one by one (summary)
 
 poisson_reg1 <- glm(miltcoup ~ oligarchy + pollib + parties + pctvote + popn + size + numregim, 
