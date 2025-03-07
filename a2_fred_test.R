@@ -11,6 +11,10 @@ names(data)
 poisson_reg <- glm (miltcoup ~ ., data = data, family = poisson)
 summary(poisson_reg)
 
+# We determine that variables for which p_value > 0.05 are not statistically significant, meaning we determine 
+#taht they do not have a significant effect on our response variable, in this case 'miltcoup' which signifies the number of military coups. 
+# We canb therefore state, that based on our data that the following variables have a significant effect: oligarchy, pollib and parties.
+
 # Remove insignificant pieces one by one (summary)
 poisson_reg1 <- glm(miltcoup ~ oligarchy + pollib + parties + pctvote + popn + size + numregim, 
                     data = data,
