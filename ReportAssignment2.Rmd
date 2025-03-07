@@ -33,17 +33,45 @@ data$pollib <- as.factor(data$pollib)
 ```
 
 #### Section a
-Note that we transformed 'pollib' into a factor since we predicted the effect to be non-linear. This was found to be correct after comparing the different Poisson model outcomes. 'pollib = 1' and 'pollib = 2' are henceforth compared to the value of 'pollib = 0'
+Note that we transformed *pollib* into a factor since we hypothesized the effect to not be strictly linear. This was found to be correct after comparing the different Poisson model outcomes. *pollib = 1* and *pollib = 2* are henceforth compared to the value of *pollib = 0*.
 
 ``` {r echo=FALSE}
 poisson_reg <- glm (miltcoup ~ ., data = data, family = poisson)
 summary(poisson_reg)
 ```
 
-We determine that variables for which p-value > 0.05 do not have a statistically significant effect on our response variable 'miltcoup' which signifies the number of military coups. Moreover, a positive coefficient details that an increase in the corresponding variable indicates an increase in 'miltcoup'. We can therefore state the following: 'oligarchy' and 'parties' are statistically significant with a positive effect on 'miltcoup'. 'pollib1' has a slightly significant and negative effect on 'miltcoup' whilst 'pollib2' has a significant negative effect. We can thus say that according to the data, countries with a higher political liberation factor may experience less military coups.
+We determine that variables for which *p-value > 0.05* do not have a statistically significant effect on our response variable *miltcoup* which signifies the number of military coups. Moreover, a positive coefficient details that an increase in the corresponding variable indicates an increase in *miltcoup*. We can therefore state the following: *oligarchy* and *parties* are statistically significant with a positive effect on *miltcoup*. *pollib1* has a slightly significant and negative effect on *miltcoup* whilst *pollib2* has a significant negative effect. We can thus say that according to the data, countries with a higher political liberation factor may experience less military coups.
 
-# Remove insignificant pieces one by one (summary)
 #### Section b
+We will now remove variables from the model one-by-one to assess which variables are significant. For clarity we will only show the last model and comment on which variables were removed.
+
+```{r echo=FALSE}
+poisson_reg1 <- glm(miltcoup ~ oligarchy + pollib + parties + pctvote + popn + size + numregim, 
+                    data = data,
+                    family = poisson)
+
+poisson_reg2 <- glm(miltcoup ~ oligarchy + pollib + parties + pctvote + popn + numregim, 
+                    data = data,
+                    family = poisson)
+
+poisson_reg3 <- glm(miltcoup ~ oligarchy + pollib + parties + pctvote + popn, 
+                    data = data,
+                    family = poisson)
+
+poisson_reg4 <- glm(miltcoup ~ oligarchy + pollib + parties + pctvote, 
+                    data = data,
+                    family = poisson)
+```
+
+Each step we removed the variable with the largest p-value for which *p-value > 0.05*. This resulted in the final poisson model with variables *oligarchy*, *pollib*, and *parties*. Note that *pollib1* does have a *p-value > 0.05*, however we include it to properly reflect the stages within the variable.
+
+``` {r}
+# Everything p < 0.05
+poisson_reg_final <- glm(miltcoup ~ oligarchy + pollib + parties, 
+                    data = data,
+                    family = poisson)
+summary(poisson_final)
+```
 
 #### Section c
 
