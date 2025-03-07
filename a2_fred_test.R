@@ -8,6 +8,8 @@ names(data)
 # To access full dataset use .
 #miltcoup is response var
 # Use glm since counting, lm not correct
+#pollib is nmot linear maybe so do the following to transform into a factor
+data$pollib <- as.factor(data$pollib)
 poisson_reg <- glm (miltcoup ~ ., data = data, family = poisson)
 summary(poisson_reg)
 
@@ -15,7 +17,11 @@ summary(poisson_reg)
 #taht they do not have a significant effect on our response variable, in this case 'miltcoup' which signifies the number of military coups. 
 # We canb therefore state, that based on our data that the following variables have a significant effect: oligarchy, pollib and parties.
 
+# We can interpret the data further by looking at the sign of the coefficient. This details that 
+# an increase oligarchy, and parties, increases miltcoup. While in increase in pollib indicate a decrease in miltcoup.
+
 # Remove insignificant pieces one by one (summary)
+
 poisson_reg1 <- glm(miltcoup ~ oligarchy + pollib + parties + pctvote + popn + size + numregim, 
                     data = data,
                     family = poisson)
