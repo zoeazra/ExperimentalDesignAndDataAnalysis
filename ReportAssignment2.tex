@@ -109,7 +109,7 @@
 
 \title{Assignment 2 - Report}
 \author{Eleni Liarou, Zoë Azra Blei, Frederieke Loth, group 20}
-\date{2025-03-07}
+\date{2025-03-08}
 
 \begin{document}
 \maketitle
@@ -453,9 +453,133 @@ computationally expensive.
 
 \paragraph{Section a}\label{section-a-1}
 
+Note that we transformed \emph{pollib} into a factor since we
+hypothesized the effect to not be strictly linear. This was found to be
+correct after comparing the different Poisson regression model outcomes.
+\emph{pollib = 1} and \emph{pollib = 2} are henceforth compared to the
+value of \emph{pollib = 0}.
+
+\begin{verbatim}
+## 
+## Call:
+## glm(formula = miltcoup ~ ., family = poisson, data = data)
+## 
+## Coefficients:
+##              Estimate Std. Error z value Pr(>|z|)   
+## (Intercept) -0.233427   0.997611   -0.23   0.8150   
+## oligarchy    0.072566   0.035346    2.05   0.0401 * 
+## pollib1     -1.103244   0.655811   -1.68   0.0925 . 
+## pollib2     -1.690306   0.676650   -2.50   0.0125 * 
+## parties      0.031221   0.011166    2.80   0.0052 **
+## pctvote      0.015441   0.010103    1.53   0.1264   
+## popn         0.010959   0.007149    1.53   0.1253   
+## size        -0.000265   0.000269   -0.99   0.3244   
+## numelec     -0.029619   0.069625   -0.43   0.6705   
+## numregim     0.210943   0.233933    0.90   0.3672   
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for poisson family taken to be 1)
+## 
+##     Null deviance: 65.945  on 35  degrees of freedom
+## Residual deviance: 28.249  on 26  degrees of freedom
+## AIC: 113.1
+## 
+## Number of Fisher Scoring iterations: 5
+\end{verbatim}
+
+We determine that variables for which \emph{p-value \textgreater{} 0.05}
+do not have a statistically significant effect on our response variable
+\emph{miltcoup} which signifies the number of military coups. Moreover,
+a positive coefficient details that an increase in the corresponding
+variable indicates an increase in \emph{miltcoup}. We can therefore
+state the following: \emph{oligarchy} and \emph{parties} are
+statistically significant with a positive effect on \emph{miltcoup}.
+\emph{pollib1} has a slightly significant and negative effect on
+\emph{miltcoup} whilst \emph{pollib2} has a significant negative effect.
+We can thus say that according to the data, countries with a higher
+political liberation factor may experience less military coups.
+
 \paragraph{Section b}\label{section-b-1}
 
+We will now remove variables from the model one-by-one to assess which
+variables are significant. For clarity we will only show the last model
+and comment on which variables were removed.
+
+At each step, we removed the variable with the largest p-value for which
+\emph{p-value \textgreater{} 0.05}. This resulted in the final poisson
+model with variables \emph{oligarchy}, \emph{pollib}, and
+\emph{parties}. Although \emph{pollib1} has a \emph{p-value
+\textgreater{} 0.05}, we include it to properly reflect the stages
+within the variable.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Everything p \textless{} 0.05}
+\NormalTok{poisson\_reg\_final }\OtherTok{\textless{}{-}} \FunctionTok{glm}\NormalTok{(miltcoup }\SpecialCharTok{\textasciitilde{}}\NormalTok{ oligarchy }\SpecialCharTok{+}\NormalTok{ pollib }\SpecialCharTok{+}\NormalTok{ parties, }
+                    \AttributeTok{data =}\NormalTok{ data,}
+                    \AttributeTok{family =}\NormalTok{ poisson)}
+\FunctionTok{summary}\NormalTok{(poisson\_reg\_final)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## glm(formula = miltcoup ~ oligarchy + pollib + parties, family = poisson, 
+##     data = data)
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(>|z|)    
+## (Intercept)   0.2080     0.4457    0.47    0.641    
+## oligarchy     0.0915     0.0226    4.05    5e-05 ***
+## pollib1      -0.4954     0.4757   -1.04    0.298    
+## pollib2      -1.1121     0.4595   -2.42    0.016 *  
+## parties       0.0224     0.0091    2.46    0.014 *  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for poisson family taken to be 1)
+## 
+##     Null deviance: 65.945  on 35  degrees of freedom
+## Residual deviance: 32.822  on 31  degrees of freedom
+## AIC: 107.6
+## 
+## Number of Fisher Scoring iterations: 5
+\end{verbatim}
+
+This final version of the model is in compliance with our findings for
+the previously determined statistically significant variables.
+
 \paragraph{Section c}\label{section-c-1}
+
+We will now use the final model to make predictions about the mean
+number of coups per level of liberalization. We create a hypothetical
+country with mean values for the numerical variables \emph{oligarchy},
+and \emph{parties}, while varying \emph{pollib} for all levels (0, 1,
+and 2).
+
+\begin{verbatim}
+## oligarchy   parties 
+##      5.22     17.08
+\end{verbatim}
+
+\begin{verbatim}
+##   pollib predicted_coups
+## 1      0           2.908
+## 2      1           1.772
+## 3      2           0.956
+\end{verbatim}
+
+From this we find the mean for \emph{oligarchy} to be \emph{5.222} and
+the mean for \emph{parties} to be \emph{17.083}. Furthermore we find the
+number of predicted coups to decrease as the index for political
+liberalization increases. We find that our hypothetical country with no
+political liberalization experiences roughly \emph{2.91} military coups,
+with limited rights it experiences an estimated \emph{1.77} coups and
+under full political liberalization it is estimated to expect roughly
+\emph{0.96} military coups. These results indicate that greater
+political liberalization is associated with fewer military coups.
 
 \section{Exercise 3: Stormer
 viscometer}\label{exercise-3-stormer-viscometer}
