@@ -284,13 +284,172 @@ From this we find the mean for *oligarchy* to be *5.222* and the mean for *parti
 
 # Exercise 3: Stormer viscometer
 
+```{r, echo=FALSE}
+library(MASS)
+data(stormer)
+library(ggplot2)
+```
+
 #### Section a
+
+To understand the relationships between the variables, a scatterplot of the data is plotted below:
+
+```{r,echo=FALSE, fig.width=6, fig.height=3}
+ggplot(stormer, aes(x = Viscosity, y = Time, color = Wt)) +
+  geom_point(size = 4) +  # Set point size
+  scale_color_gradient(low = "purple", high = "yellow") + 
+  labs(title = "Relationship Between Viscosity, Time, and Weight",
+       x = "Viscosity (v)", y = "Time (T)", color = "Weight (w)") +
+  theme_minimal() 
+```
+
+The scatterplot visualizes that higher weight values correspond to lower time values, demonstrating an inverse relationship between weight and time. Additionally, the pattern of points suggests a nonlinear relationship between viscosity and time, supporting the theoretical nonlinear model:
+
+$$ 
+T = \frac{\theta_1 v}{w - \theta_2} + e
+$$ However, in order to estimate the parameters $\theta_1$ and $\theta_2$, since the theoretical model can be rewritten to a linear form, we can first apply linear regression to obtain initial estimates using the following formula: $$
+wT = \theta_1 v + \theta_2 T + (w - \theta_2)e
+$$ As the variance of the error term is not constant, we have to take into account heteroscedasticity. For this, the variance of $wT$ becomes the following: $$
+Var(wT) = \sigma^2(w - \theta_2)^2
+$$ We use Weighted Least Squares and set the weights in the regression as, using an initial guess for $\theta_2$ to do the linear regression: $$
+w_i = \frac{1}{(w_i - \hat{\theta}_2)^2}
+$$
+
+```{r}
+theta2_init = mean(stormer$Wt)
+weights_wls = 1 / (stormer$Wt - theta2_init)^2
+linear_model_wls = lm(Wt * Time ~ Viscosity + Time, data = stormer, weights = weights_wls)
+summary(linear_model_wls)
+```
+
+The found estimated values are $\theta_1 = 26.499$ and $\theta_2 = 5.150$, where only the value of $\theta_1$ is statistically significant. Using these estimated values, we can do nonlinear regression:
+
+```{r}
+theta1_wls <- coef(linear_model_wls)["Viscosity"]
+theta2_wls <- coef(linear_model_wls)["Time"]
+nls_model_weighted <- nls(Time ~ (theta1 * Viscosity) / (Wt - theta2), 
+                          data = stormer,
+                          start = list(theta1 = theta1_wls, theta2 = theta2_wls),
+                          weights = 1 / (Wt - theta2_wls)^2)
+
+summary(nls_model_weighted)
+```
+
+The final estimated values are $\theta_1 = 29.637$ and $\theta_2 = 2.065$, where only $\theta_1$ seems statistically significant. Additionally, the residual standard error is smaller (0.342) compared to the linear model (22.96) indicating that this model has much less unexplained variation.
+
+```{r, echo=FALSE, fig.width=6, fig.height=3}
+viscosity_seq = seq(min(stormer$Viscosity), max(stormer$Viscosity), length.out = 100)
+wt_values = unique(stormer$Wt)
+plot_data = data.frame()
+
+# Compute predicted Time for each viscosity and weight value using the weighted nonlinear model
+for (w in wt_values) {
+  pred_time <- predict(nls_model_weighted, 
+                       newdata = data.frame(Viscosity = viscosity_seq, Wt = w))
+  plot_data <- rbind(plot_data, data.frame(Viscosity = viscosity_seq, Time = pred_time, Weight = w))
+}
+
+# Scatterplot of original data with color by weight
+ggplot(stormer, aes(x = Viscosity, y = Time, color = Wt)) +
+  geom_point(size = 3) +
+  scale_color_gradient(low = "purple", high = "yellow") +  
+  geom_line(data = plot_data, aes(x = Viscosity, y = Time, group = Weight), 
+            color = "red", size = 1.2) +
+  labs(title = "Fitted Model for Time vs. Viscosity",
+       x = "Viscosity (v)", y = "Time (T)",
+       color = "Weight (w)") +
+  theme_minimal() +
+  ylim(0, 300)
+```
+
+The final plot shows that the nonlinear regression model fits the data well, capturing the expected trend between viscosity and time while accounting for different weight values. The fitted curves align closely with the data points, confirming that the nonlinear model is more appropriate than a linear model.However, the separation of curves suggests some variation in the effect of weight, and $\theta_2$ was not statistically significant, indicating potential refinements in the model.
 
 #### Section b
 
+A two-tailed t-test is conducted, as we have no expectation about whether $\theta_1$ will be greater or smaller than 25; it could differ in either direction. We consider the null hypothesis H0: $\theta_1$ = 25. For the test, we use the estimated $\theta_1$ and its standard error obtained from question a). The test resulted in a t-statistic of 4.81 and a p-value of 9.45e-05, which is far below the typical significance level of 0.05. This means we reject H0 and conclude that $\theta_1$ is significantly different from 25, further supporting the nonlinear model's results.
+
+```{r}
+theta1_hat = 29.4013  # Estimated parameter
+theta1_se = 0.9155    # Standard error
+theta1_h0 = 25        # Hypothesized value under H0
+df = 21               # Degrees of freedom from nls summary
+
+t_stat = (theta1_hat - theta1_h0) / theta1_se
+p_value = 2 * pt(-abs(t_stat), df)
+```
+
+```{r,echo=FALSE,results='asis'}
+rounded_p = formatC(p_value, format = "e", digits = 3)
+cat("**Test Statistic (t):**", round(t_stat,3), "\n\n")
+cat("**P-value:**", rounded_p, "\n")
+```
+
 #### Section c
+
+For computing the 92% confidence interval for $\theta_1$ and $\theta_2$, we consider the following formula to calculate the z-value: $$
+\hat{\theta} \pm z_{\alpha/2} \cdot SE(\theta)
+$$ where $z_{\alpha/2}$ is the critical value from the standard normal distribution. For a 92% confidence level, the significance level is $\alpha$ = 0.08, thus: $$z_{0.04/2} = z_{0.02} \approx 1.75$$
+
+This gave a 92% CI for $\theta_1$​ of [27.80, 31.00] and for $\theta_2$​ of [1.05, 3.38], meaning we are 92% confident that the true values lie within these intervals. Since the confidence interval for $\theta_1$​ does not include 25, it further supports rejecting H0​ from question b).
+
+```{r}
+theta1_hat <- 29.4013  # Estimated θ1
+theta1_se <- 0.9155    # Standard error of θ1
+theta2_hat <- 2.2183   # Estimated θ2
+theta2_se <- 0.6655    # Standard error of θ2
+
+z_value = qnorm(0.96)  # 1.75
+
+theta1_CI = c(theta1_hat - z_value * theta1_se, theta1_hat + z_value * theta1_se)
+theta2_CI = c(theta2_hat - z_value * theta2_se, theta2_hat + z_value * theta2_se)
+```
+
+```{r,echo=FALSE,results='asis'}
+cat("**92% CI for θ1:** [", round(theta1_CI,3), "]\n\n")
+cat("**92% CI for θ2:** [", round(theta2_CI,3), "]\n")
+```
 
 #### Section d
 
+The expected values are computed using the nonlinear model with $w$ = 50, and viscosity values ranging from 10 to 300. The 94% confidence intervals were derived using asymptotic normality, where the standard error of T was estimated through error propagation. The confidence bounds were calculated as:
+
+$$T(v) \pm z_{\alpha/2} \cdot SE(T)$$
+
+where $z_{0.03}$ = 1.88 is the critical value for a 94% confidence level. The plot shows the expected T along with a shaded confidence band, indicating the uncertainty in our estimates. The confidence interval widens as viscosity increases, reflecting greater uncertainty for larger $v$. The linear trend suggests a strong relationship between viscosity and time, but further diagnostics are needed to confirm model assumptions. Overall, the plot aligns well with the theoretical nonlinear model, supporting its validity over a simple linear approximation.
+
+```{}
+```
+
+```{r}
+theta1_hat = 29.4013  # Estimate of theta1
+theta2_hat = 2.2183   # Estimate of theta2
+theta1_se = 0.9155    # Standard error of theta1
+theta2_se = 0.6655    # Standard error of theta2
+w_fixed = 50
+v_values = seq(10, 300, length.out = 100)
+
+T_hat = (theta1_hat * v_values) / (w_fixed - theta2_hat)
+T_se = sqrt(
+  (v_values / (w_fixed - theta2_hat))^2 * theta1_se^2 +
+  (theta1_hat * v_values / (w_fixed - theta2_hat)^2)^2 * theta2_se^2
+)
+
+z_value = qnorm(0.97)
+T_lower = T_hat - z_value * T_se
+T_upper = T_hat + z_value * T_se
+```
+
+```{r,echo=FALSE, fig.width=6, fig.height=3}
+df <- data.frame(v_values, T_hat, T_lower, T_upper)
+ggplot(df, aes(x = v_values, y = T_hat)) +
+  geom_line(color = "blue", linewidth = 1) +  
+  geom_ribbon(aes(ymin = T_lower, ymax = T_upper), alpha = 0.2, fill = "blue") +
+  labs(title = "94% Confidence Interval for Expected T",
+       x = "Viscosity (v)", y = "Expected Time (T)") +
+  theme_minimal()
+```
+
 #### Section e
+
+To investigate whether the smaller model with $\theta_1$ = 25 is appropriate, we compare it to the estimated model using hypothesis testing and model evaluation metrics. From question b), the T-test rejected H0: $\theta_1$ =25 with a p-value of 9.45e-05, indicating that setting $\theta_1$ = 25 significantly deviates from the data. Additionally, the 92% confidence interval for $\theta_1$ of [27.80, 31.00] does not contain 25, further supporting that the restriction is inappropriate. A likelihood ratio test could be performed to formally compare the smaller model to the unrestricted model, however, the hypothesis test already suggests a poor fit. Constraining $\theta_1$ may lead to higher residual errors and reduced model flexibility, making the model less accurate. Given these findings, the smaller model does not seem appropriate, as it forces an assumption that contradicts the observed data. Therefore, the unrestricted nonlinear model remains the more valid choice.
 :::
