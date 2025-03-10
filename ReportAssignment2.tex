@@ -459,6 +459,13 @@ correct after comparing the different Poisson regression model outcomes.
 \emph{pollib = 1} and \emph{pollib = 2} are henceforth compared to the
 value of \emph{pollib = 0}.
 
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{poisson\_reg }\OtherTok{\textless{}{-}} \FunctionTok{glm}\NormalTok{ (miltcoup }\SpecialCharTok{\textasciitilde{}}\NormalTok{ ., }\AttributeTok{data =}\NormalTok{ data, }\AttributeTok{family =}\NormalTok{ poisson)}
+\FunctionTok{summary}\NormalTok{(poisson\_reg)}
+\end{Highlighting}
+\end{Shaded}
+
 \begin{verbatim}
 ## 
 ## Call:
@@ -559,10 +566,33 @@ country with mean values for the numerical variables \emph{oligarchy},
 and \emph{parties}, while varying \emph{pollib} for all levels (0, 1,
 and 2).
 
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Get all columns of which to take average}
+\NormalTok{selected\_vars }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"oligarchy"}\NormalTok{, }\StringTok{"parties"}\NormalTok{) }
+
+\CommentTok{\# Compute the means}
+\NormalTok{cols\_means }\OtherTok{\textless{}{-}} \FunctionTok{colMeans}\NormalTok{(data[, selected\_vars])}
+\NormalTok{cols\_means}
+\end{Highlighting}
+\end{Shaded}
+
 \begin{verbatim}
 ## oligarchy   parties 
 ##      5.22     17.08
 \end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Create dataset for prediction with pollib as a factor}
+\NormalTok{data2 }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{pollib =} \FunctionTok{factor}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{), }\AttributeTok{levels =} \FunctionTok{levels}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{pollib)), }
+                    \FunctionTok{t}\NormalTok{(cols\_means))}
+
+\CommentTok{\# Make prediction}
+\NormalTok{predicted\_coups }\OtherTok{\textless{}{-}} \FunctionTok{predict}\NormalTok{(poisson\_reg\_final, }\AttributeTok{newdata =}\NormalTok{ data2, }\AttributeTok{type =} \StringTok{\textquotesingle{}response\textquotesingle{}}\NormalTok{)}
+\FunctionTok{data.frame}\NormalTok{(}\AttributeTok{pollib =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{), }\AttributeTok{predicted\_coups =}\NormalTok{ predicted\_coups)}
+\end{Highlighting}
+\end{Shaded}
 
 \begin{verbatim}
 ##   pollib predicted_coups
