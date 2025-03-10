@@ -109,7 +109,7 @@
 
 \title{Assignment 2 - Report}
 \author{Eleni Liarou, Zoë Azra Blei, Frederieke Loth, group 20}
-\date{2025-03-08}
+\date{2025-03-10}
 
 \begin{document}
 \maketitle
@@ -586,12 +586,254 @@ viscometer}\label{exercise-3-stormer-viscometer}
 
 \paragraph{Section a}\label{section-a-2}
 
+To understand the relationships between the variables, a scatterplot of
+the data is plotted below:
+
+\includegraphics{ReportAssignment2_files/figure-latex/unnamed-chunk-20-1.pdf}
+
+The scatterplot visualizes that higher weight values correspond to lower
+time values, demonstrating an inverse relationship between weight and
+time. Additionally, the pattern of points suggests a nonlinear
+relationship between viscosity and time, supporting the theoretical
+nonlinear model:
+
+\[ 
+T = \frac{\theta_1 v}{w - \theta_2} + e
+\] However, in order to estimate the parameters \(\theta_1\) and
+\(\theta_2\), since the theoretical model can be rewritten to a linear
+form, we can first apply linear regression to obtain initial estimates
+using the following formula: \[
+wT = \theta_1 v + \theta_2 T + (w - \theta_2)e
+\] As the variance of the error term is not constant, we have to take
+into account heteroscedasticity. For this, the variance of \(wT\)
+becomes the following: \[
+Var(wT) = \sigma^2(w - \theta_2)^2
+\] We use Weighted Least Squares and set the weights in the regression
+as, using an initial guess for \(\theta_2\) to do the linear regression:
+\[
+w_i = \frac{1}{(w_i - \hat{\theta}_2)^2}
+\]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{theta2\_init }\OtherTok{=} \FunctionTok{mean}\NormalTok{(stormer}\SpecialCharTok{$}\NormalTok{Wt)}
+\NormalTok{weights\_wls }\OtherTok{=} \DecValTok{1} \SpecialCharTok{/}\NormalTok{ (stormer}\SpecialCharTok{$}\NormalTok{Wt }\SpecialCharTok{{-}}\NormalTok{ theta2\_init)}\SpecialCharTok{\^{}}\DecValTok{2}
+\NormalTok{linear\_model\_wls }\OtherTok{=} \FunctionTok{lm}\NormalTok{(Wt }\SpecialCharTok{*}\NormalTok{ Time }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Viscosity }\SpecialCharTok{+}\NormalTok{ Time, }\AttributeTok{data =}\NormalTok{ stormer, }\AttributeTok{weights =}\NormalTok{ weights\_wls)}
+\FunctionTok{summary}\NormalTok{(linear\_model\_wls)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = Wt * Time ~ Viscosity + Time, data = stormer, weights = weights_wls)
+## 
+## Weighted Residuals:
+##    Min     1Q Median     3Q    Max 
+## -58.56 -10.64  -2.31   7.60  44.11 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)   222.57      79.26    2.81    0.011 *  
+## Viscosity      26.50       1.69   15.64  1.1e-12 ***
+## Time            5.15       2.77    1.86    0.078 .  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 23 on 20 degrees of freedom
+## Multiple R-squared:  0.993,  Adjusted R-squared:  0.993 
+## F-statistic: 1.47e+03 on 2 and 20 DF,  p-value: <2e-16
+\end{verbatim}
+
+The found estimated values are \(\theta_1 = 26.499\) and
+\(\theta_2 = 5.150\), where only the value of \(\theta_1\) is
+statistically significant. Using these estimated values, we can do
+nonlinear regression:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{theta1\_wls }\OtherTok{\textless{}{-}} \FunctionTok{coef}\NormalTok{(linear\_model\_wls)[}\StringTok{"Viscosity"}\NormalTok{]}
+\NormalTok{theta2\_wls }\OtherTok{\textless{}{-}} \FunctionTok{coef}\NormalTok{(linear\_model\_wls)[}\StringTok{"Time"}\NormalTok{]}
+\NormalTok{nls\_model\_weighted }\OtherTok{\textless{}{-}} \FunctionTok{nls}\NormalTok{(Time }\SpecialCharTok{\textasciitilde{}}\NormalTok{ (theta1 }\SpecialCharTok{*}\NormalTok{ Viscosity) }\SpecialCharTok{/}\NormalTok{ (Wt }\SpecialCharTok{{-}}\NormalTok{ theta2), }
+                          \AttributeTok{data =}\NormalTok{ stormer,}
+                          \AttributeTok{start =} \FunctionTok{list}\NormalTok{(}\AttributeTok{theta1 =}\NormalTok{ theta1\_wls, }\AttributeTok{theta2 =}\NormalTok{ theta2\_wls),}
+                          \AttributeTok{weights =} \DecValTok{1} \SpecialCharTok{/}\NormalTok{ (Wt }\SpecialCharTok{{-}}\NormalTok{ theta2\_wls)}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{)}
+
+\FunctionTok{summary}\NormalTok{(nls\_model\_weighted)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Formula: Time ~ (theta1 * Viscosity)/(Wt - theta2)
+## 
+## Parameters:
+##        Estimate Std. Error t value Pr(>|t|)    
+## theta1    29.64       2.62   11.29  2.2e-10 ***
+## theta2     2.06       1.62    1.27     0.22    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.342 on 21 degrees of freedom
+## 
+## Number of iterations to convergence: 3 
+## Achieved convergence tolerance: 2.11e-06
+\end{verbatim}
+
+The final estimated values are \(\theta_1 = 29.637\) and
+\(\theta_2 = 2.065\), where only \(\theta_1\) seems statistically
+significant. Additionally, the residual standard error is smaller
+(0.342) compared to the linear model (22.96) indicating that this model
+has much less unexplained variation.
+
+\begin{verbatim}
+## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+## i Please use `linewidth` instead.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+## generated.
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: Removed 41 rows containing missing values or values outside the scale range
+## (`geom_line()`).
+\end{verbatim}
+
+\includegraphics{ReportAssignment2_files/figure-latex/unnamed-chunk-23-1.pdf}
+
+The final plot shows that the nonlinear regression model fits the data
+well, capturing the expected trend between viscosity and time while
+accounting for different weight values. The fitted curves align closely
+with the data points, confirming that the nonlinear model is more
+appropriate than a linear model.However, the separation of curves
+suggests some variation in the effect of weight, and \(\theta_2\) was
+not statistically significant, indicating potential refinements in the
+model.
+
 \paragraph{Section b}\label{section-b-2}
+
+A two-tailed t-test is conducted, as we have no expectation about
+whether \(\theta_1\) will be greater or smaller than 25; it could differ
+in either direction. We consider the null hypothesis H0: \(\theta_1\) =
+25. For the test, we use the estimated \(\theta_1\) and its standard
+error obtained from question a). The test resulted in a t-statistic of
+4.81 and a p-value of 9.45e-05, which is far below the typical
+significance level of 0.05. This means we reject H0 and conclude that
+\(\theta_1\) is significantly different from 25, further supporting the
+nonlinear model's results.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{theta1\_hat }\OtherTok{=} \FloatTok{29.4013}  \CommentTok{\# Estimated parameter}
+\NormalTok{theta1\_se }\OtherTok{=} \FloatTok{0.9155}    \CommentTok{\# Standard error}
+\NormalTok{theta1\_h0 }\OtherTok{=} \DecValTok{25}        \CommentTok{\# Hypothesized value under H0}
+\NormalTok{df }\OtherTok{=} \DecValTok{21}               \CommentTok{\# Degrees of freedom from nls summary}
+
+\NormalTok{t\_stat }\OtherTok{=}\NormalTok{ (theta1\_hat }\SpecialCharTok{{-}}\NormalTok{ theta1\_h0) }\SpecialCharTok{/}\NormalTok{ theta1\_se}
+\NormalTok{p\_value }\OtherTok{=} \DecValTok{2} \SpecialCharTok{*} \FunctionTok{pt}\NormalTok{(}\SpecialCharTok{{-}}\FunctionTok{abs}\NormalTok{(t\_stat), df)}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{Test Statistic (t):} 4.81
+
+\textbf{P-value:} 9.454e-05
 
 \paragraph{Section c}\label{section-c-2}
 
+For computing the 92\% confidence interval for \(\theta_1\) and
+\(\theta_2\), we consider the following formula to calculate the
+z-value: \[
+\hat{\theta} \pm z_{\alpha/2} \cdot SE(\theta)
+\] where \(z_{\alpha/2}\) is the critical value from the standard normal
+distribution. For a 92\% confidence level, the significance level is
+\(\alpha\) = 0.08, thus: \[z_{0.04/2} = z_{0.02} \approx 1.75\]
+
+This gave a 92\% CI for \(\theta_1\)\hspace{0pt} of {[}27.80, 31.00{]}
+and for \(\theta_2\)\hspace{0pt} of {[}1.05, 3.38{]}, meaning we are
+92\% confident that the true values lie within these intervals. Since
+the confidence interval for \(\theta_1\)\hspace{0pt} does not include
+25, it further supports rejecting H0\hspace{0pt} from question b).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{theta1\_hat }\OtherTok{\textless{}{-}} \FloatTok{29.4013}  \CommentTok{\# Estimated θ1}
+\NormalTok{theta1\_se }\OtherTok{\textless{}{-}} \FloatTok{0.9155}    \CommentTok{\# Standard error of θ1}
+\NormalTok{theta2\_hat }\OtherTok{\textless{}{-}} \FloatTok{2.2183}   \CommentTok{\# Estimated θ2}
+\NormalTok{theta2\_se }\OtherTok{\textless{}{-}} \FloatTok{0.6655}    \CommentTok{\# Standard error of θ2}
+
+\NormalTok{z\_value }\OtherTok{=} \FunctionTok{qnorm}\NormalTok{(}\FloatTok{0.96}\NormalTok{)  }\CommentTok{\# 1.75}
+
+\NormalTok{theta1\_CI }\OtherTok{=} \FunctionTok{c}\NormalTok{(theta1\_hat }\SpecialCharTok{{-}}\NormalTok{ z\_value }\SpecialCharTok{*}\NormalTok{ theta1\_se, theta1\_hat }\SpecialCharTok{+}\NormalTok{ z\_value }\SpecialCharTok{*}\NormalTok{ theta1\_se)}
+\NormalTok{theta2\_CI }\OtherTok{=} \FunctionTok{c}\NormalTok{(theta2\_hat }\SpecialCharTok{{-}}\NormalTok{ z\_value }\SpecialCharTok{*}\NormalTok{ theta2\_se, theta2\_hat }\SpecialCharTok{+}\NormalTok{ z\_value }\SpecialCharTok{*}\NormalTok{ theta2\_se)}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{92\% CI for θ1:} {[} 27.8 31 {]}
+
+\textbf{92\% CI for θ2:} {[} 1.05 3.38 {]}
+
 \paragraph{Section d}\label{section-d-1}
 
+The expected values are computed using the nonlinear model with \(w\) =
+50, and viscosity values ranging from 10 to 300. The 94\% confidence
+intervals were derived using asymptotic normality, where the standard
+error of T was estimated through error propagation. The confidence
+bounds were calculated as:
+
+\[T(v) \pm z_{\alpha/2} \cdot SE(T)\]
+
+where \(z_{0.03}\) = 1.88 is the critical value for a 94\% confidence
+level. The plot shows the expected T along with a shaded confidence
+band, indicating the uncertainty in our estimates. The confidence
+interval widens as viscosity increases, reflecting greater uncertainty
+for larger \(v\). The linear trend suggests a strong relationship
+between viscosity and time, but further diagnostics are needed to
+confirm model assumptions. Overall, the plot aligns well with the
+theoretical nonlinear model, supporting its validity over a simple
+linear approximation.
+
+\begin{verbatim}
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{theta1\_hat }\OtherTok{=} \FloatTok{29.4013}  \CommentTok{\# Estimate of theta1}
+\NormalTok{theta2\_hat }\OtherTok{=} \FloatTok{2.2183}   \CommentTok{\# Estimate of theta2}
+\NormalTok{theta1\_se }\OtherTok{=} \FloatTok{0.9155}    \CommentTok{\# Standard error of theta1}
+\NormalTok{theta2\_se }\OtherTok{=} \FloatTok{0.6655}    \CommentTok{\# Standard error of theta2}
+\NormalTok{w\_fixed }\OtherTok{=} \DecValTok{50}
+\NormalTok{v\_values }\OtherTok{=} \FunctionTok{seq}\NormalTok{(}\DecValTok{10}\NormalTok{, }\DecValTok{300}\NormalTok{, }\AttributeTok{length.out =} \DecValTok{100}\NormalTok{)}
+
+\NormalTok{T\_hat }\OtherTok{=}\NormalTok{ (theta1\_hat }\SpecialCharTok{*}\NormalTok{ v\_values) }\SpecialCharTok{/}\NormalTok{ (w\_fixed }\SpecialCharTok{{-}}\NormalTok{ theta2\_hat)}
+\NormalTok{T\_se }\OtherTok{=} \FunctionTok{sqrt}\NormalTok{(}
+\NormalTok{  (v\_values }\SpecialCharTok{/}\NormalTok{ (w\_fixed }\SpecialCharTok{{-}}\NormalTok{ theta2\_hat))}\SpecialCharTok{\^{}}\DecValTok{2} \SpecialCharTok{*}\NormalTok{ theta1\_se}\SpecialCharTok{\^{}}\DecValTok{2} \SpecialCharTok{+}
+\NormalTok{  (theta1\_hat }\SpecialCharTok{*}\NormalTok{ v\_values }\SpecialCharTok{/}\NormalTok{ (w\_fixed }\SpecialCharTok{{-}}\NormalTok{ theta2\_hat)}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{)}\SpecialCharTok{\^{}}\DecValTok{2} \SpecialCharTok{*}\NormalTok{ theta2\_se}\SpecialCharTok{\^{}}\DecValTok{2}
+\NormalTok{)}
+
+\NormalTok{z\_value }\OtherTok{=} \FunctionTok{qnorm}\NormalTok{(}\FloatTok{0.97}\NormalTok{)}
+\NormalTok{T\_lower }\OtherTok{=}\NormalTok{ T\_hat }\SpecialCharTok{{-}}\NormalTok{ z\_value }\SpecialCharTok{*}\NormalTok{ T\_se}
+\NormalTok{T\_upper }\OtherTok{=}\NormalTok{ T\_hat }\SpecialCharTok{+}\NormalTok{ z\_value }\SpecialCharTok{*}\NormalTok{ T\_se}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{ReportAssignment2_files/figure-latex/unnamed-chunk-29-1.pdf}
+
 \paragraph{Section e}\label{section-e-1}
+
+To investigate whether the smaller model with \(\theta_1\) = 25 is
+appropriate, we compare it to the estimated model using hypothesis
+testing and model evaluation metrics. From question b), the T-test
+rejected H0: \(\theta_1\) =25 with a p-value of 9.45e-05, indicating
+that setting \(\theta_1\) = 25 significantly deviates from the data.
+Additionally, the 92\% confidence interval for \(\theta_1\) of {[}27.80,
+31.00{]} does not contain 25, further supporting that the restriction is
+inappropriate. A likelihood ratio test could be performed to formally
+compare the smaller model to the unrestricted model, however, the
+hypothesis test already suggests a poor fit. Constraining \(\theta_1\)
+may lead to higher residual errors and reduced model flexibility, making
+the model less accurate. Given these findings, the smaller model does
+not seem appropriate, as it forces an assumption that contradicts the
+observed data. Therefore, the unrestricted nonlinear model remains the
+more valid choice.
 
 \end{document}
