@@ -263,7 +263,7 @@ This final version of the model is in compliance with our findings for the previ
 
 We will now use the final model to make predictions about the mean number of coups per level of liberalization. We create a hypothetical country with mean values for the numerical variables *oligarchy*, and *parties*, while varying *pollib* for all levels (0, 1, and 2). 
 
-``` {r echo = FALSE}
+``` {r}
 # Get all columns of which to take average
 selected_vars <- c("oligarchy", "parties") 
 
