@@ -219,7 +219,7 @@ data$pollib <- as.factor(data$pollib)
 #### Section a
 Note that we transformed *pollib* into a factor since we hypothesized the effect to not be strictly linear. This was found to be correct after comparing the different Poisson regression model outcomes. *pollib = 1* and *pollib = 2* are henceforth compared to the value of *pollib = 0*.
 
-``` {r echo=FALSE}
+``` {r}
 poisson_reg <- glm (miltcoup ~ ., data = data, family = poisson)
 summary(poisson_reg)
 ```
